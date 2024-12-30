@@ -165,7 +165,7 @@ export default function Staking() {
   useEffect(() => {
     async function updateStakeInfo() {
       if (isUSDTTransferConfirmed && address) {
-        console.log("isConfirmingUSDTTransfer", isConfirmingUSDTTransfer);
+        console.log("isUSDTTransferConfirmed", isUSDTTransferConfirmed);
         await UserService.addStakeInfo({
           wallet: address,
           stakeData: {
@@ -185,7 +185,7 @@ export default function Staking() {
       }
     }
     updateStakeInfo();
-  }, [isConfirmingUSDTTransfer]);
+  }, [isUSDTTransferConfirmed]);
 
   return (
     <div className="max-w-4xl mx-auto space-y-4 md:space-y-6">
