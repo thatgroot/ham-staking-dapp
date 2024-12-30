@@ -5,7 +5,7 @@ import { LoaderCircle } from "lucide-react";
 import { ReferralNode } from "@/components/UI/Referrals/ReferralNode";
 import { ReferralService } from "@/services/referral";
 
-export function ReferralsContent() {
+export default function ReferralsContent() {
   const [publicKey] = useState("");
   const [loading, setLoading] = useState(true);
   const [referrals, setReferrals] = useState<Referral>();
