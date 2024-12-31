@@ -106,7 +106,7 @@ export const ComissionService = {
       if (
         node.level === 2 &&
         directReferralsCount >= 5 &&
-        (node.data.groupStakes ?? 0) >= 2500
+        (node.data.groupUSDTStakes ?? 0) >= 2500
       ) {
         rate = 0.15; // Apply 15% instead of 5% for 2nd-level referral
       }

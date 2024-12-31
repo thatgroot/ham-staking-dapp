@@ -5,12 +5,12 @@ import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { BinanceCoin } from "iconsax-react";
-import ThemeToggler from "@/components/UI/Dashboard/ThemeChanger";
+import ThemeToggler from "@/components/ui/Dashboard/ThemeChanger";
 import { menuItems } from "./menu-items";
 import { Menu, X } from "lucide-react";
-import PoweredByBnb from "@/components/UI/Main/PoweredByBnb";
+import PoweredByBnb from "@/components/ui/Main/PoweredByBnb";
 import { useAccount } from "wagmi";
-import { ConnectMetaMask } from "@/components/UI/Web3/ConnectMetaMask";
+import { ConnectMetaMask } from "@/components/ui/Web3/ConnectMetaMask";
 
 const menuVariants = {
   closed: {

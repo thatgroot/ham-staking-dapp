@@ -6,9 +6,9 @@ import Swap from "@/public/assets/swap.svg";
 import Withdraw from "@/public/assets/withdraw.svg";
 import Image from "next/image";
 import { CloseSquare } from "iconsax-react";
-import ThemeToggler from "@/components/UI/Dashboard/ThemeChanger";
+import ThemeToggler from "@/components/ui/Dashboard/ThemeChanger";
 import { X } from "lucide-react";
-import PoweredByBnb from "@/components/UI/Main/PoweredByBnb";
+import PoweredByBnb from "@/components/ui/Main/PoweredByBnb";
 
 const menuItems = [
   {

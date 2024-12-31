@@ -1,11 +1,11 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Button from "@/components/UI/Main/Button";
+import Button from "@/components/ui/Main/Button";
 import { MenuIcon, Wallet } from "lucide-react";
 import Link from "next/link";
-import Logo from "@/components/UI/Main/Logo";
-import { ConnectMetaMask } from "@/components/UI/Web3/ConnectMetaMask";
+import Logo from "@/components/ui/Main/Logo";
+import { ConnectMetaMask } from "@/components/ui/Web3/ConnectMetaMask";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);

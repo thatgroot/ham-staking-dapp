@@ -1,4 +1,4 @@
-import Button from "@/components/UI/Main/Button";
+import Button from "@/components/ui/Main/Button";
 import heroBg from "@/public/main/heroBg.png";
 import Link from "next/link";
 

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LoaderCircle } from "lucide-react";
-import { VBox } from "@/components/UI/Directional/flex";
+import { VBox } from "@/components/ui/Directional/flex";
 import { ReferralService } from "@/services/referral";
 import { useSignupForm } from "@/hooks/signup";
 

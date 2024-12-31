@@ -1,4 +1,4 @@
-import PoweredByBnb from "@/components/UI/Main/PoweredByBnb";
+import PoweredByBnb from "@/components/ui/Main/PoweredByBnb";
 import { Twitter, Facebook, Instagram } from "lucide-react";
 
 const Footer = () => {
@@ -7,7 +7,9 @@ const Footer = () => {
       <div className="max-w-[1440px] mx-auto px-6 md:px-[100px] py-6 flex flex-col md:flex-row items-center justify-between">
         {/* Logo */}
         {/* <div className="text-2xl font-bold">HAM</div> */}
-        <div><PoweredByBnb /></div>
+        <div>
+          <PoweredByBnb />
+        </div>
 
         {/* Navigation Links */}
         <div className="flex flex-col md:flex-row items-center gap-5 mt-4 md:mt-0">
@@ -28,7 +30,6 @@ const Footer = () => {
           <a href="#" className="text-xl cursor-pointer hover:text-blue-600">
             <Instagram />
           </a>
-        
         </div>
       </div>
     </div>

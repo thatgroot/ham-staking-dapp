@@ -44,14 +44,15 @@ interface UserData {
    * user stake info based on timestamp [string]
    */
   stakeInfo?: Record<string, StakeInfo>;
-  groupStakes?: number;
+  groupUSDTStakes?: number;
+  groupBNBStakes?: number;
   stakedBNB?: number;
   stakedUSDT?: number;
   stakeClaimed?: number;
   // usdt stakes earning
-  usdtStakesEarning?: number;
+  usdtReferralsEarning?: number;
   // bnb stakes earning
-  bnbStakesEarning?: number;
+  bnbReferralsEarning?: number;
   /**
    * @stakedOn: milliseconds number value of date
    */
@@ -67,4 +68,18 @@ interface ReferralData {
   wallet: string;
   code: string;
   by: string;
+}
+
+interface Withdraw {
+  type: "Staking APY" | "Referral Earning";
+  coin: Coin;
+  amount: number;
+  toWallet: `0x${string}`;
+  requestedBy: `0x${string}`;
+  requestedOn: number;
+  status: "requested" | "rejected" | "accepted";
+}
+
+interface UserWithdraws {
+  [key: number]: Withdraw;
 }

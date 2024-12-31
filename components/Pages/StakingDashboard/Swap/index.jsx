@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import Image from "next/image";
-import PoweredByBnb from "@/components/UI/Main/PoweredByBnb";
+import PoweredByBnb from "@/components/ui/Main/PoweredByBnb";
 
 import HAM from "@/public/assets/ham-logo.png";
 
@@ -124,7 +124,7 @@ export default function SwapCard() {
 
   const calculateUsdValue = useCallback((amount, currency) => {
     const rate = currency === "BNB" ? 300 : 1;
-    return (parseFloat(amount) * rate).toFixed(2);
+    return (parseFloat(amount) * rate).toFixed(4);
   }, []);
 
   return (

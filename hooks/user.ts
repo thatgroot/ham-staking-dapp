@@ -1,4 +1,5 @@
 import { db } from "@/services/firebase";
+import { ReferralService } from "@/services/referral";
 import { UserService } from "@/services/user";
 import { collection, doc, getDoc } from "firebase/firestore";
 import { useState, useEffect } from "react";
@@ -80,4 +81,44 @@ export const useUserData = () => {
   }, [address]);
 
   return { data, loading, error };
+};
+
+export const useUserReferrals = () => {
+  const { address } = useAccount();
+  const [count, setCount] = useState<number>(0);
+  const [loading, setLoading] = useState<boolean>(true);
+  // ReferralService.getReferralCount()
+
+  useEffect(() => {
+    const fetchReferralCount = async () => {
+      try {
+        setLoading(true);
+        const count = await ReferralService.getReferralCount(address as string);
+        setCount(count);
+      } catch (err) {
+        console.error("Error fetching referral count:", err);
+        setCount(0);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (address) {
+      fetchReferralCount();
+    }
+  }, [address]);
+
+  return { count, loading };
+};
+
+export const useWithdraw = () => {
+  const [, setLoading] = useState(false);
+
+  useEffect(() => {
+    setLoading(true);
+  }, []);
+
+  function request() {}
+
+  return { request };
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 import SalaryIcon from "@/public/assets/salary.png";
 import { ArrowDownIcon as ArrowDown3 } from "lucide-react";
 import Image from "next/image";
@@ -12,14 +12,18 @@ const Calculator = () => {
   const [dailyRate, setDailyRate] = useState(0.5); // default to 0.5%
 
   // Mapping duration to daily rates
-  const durationOptions = {
+  const durationOptions: {
+    [key: number]: {
+      daily: number;
+    };
+  } = {
     200: { daily: 0.5 },
     365: { daily: 0.6 },
     500: { daily: 0.7 },
   };
 
   // Handle change for staking amount
-  const handleStakingAmountChange = (e) => {
+  const handleStakingAmountChange = (e: ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value);
     if (!isNaN(value)) {
       setStakingAmount(value);
@@ -27,7 +31,7 @@ const Calculator = () => {
   };
 
   // Handle change for staking duration
-  const handleStakingDurationChange = (duration) => {
+  const handleStakingDurationChange = (duration: number) => {
     setStakingDuration(duration);
     setDailyRate(durationOptions[duration].daily);
   };
@@ -47,7 +51,7 @@ const Calculator = () => {
   };
 
   // Handle selecting an option from the custom dropdown
-  const handleSelectOption = (option) => {
+  const handleSelectOption = (option: string) => {
     setSelectedOption(option);
     setDropdownOpen(false);
   };
@@ -85,12 +89,6 @@ const Calculator = () => {
                   </div>
                   {isDropdownOpen && (
                     <div className="absolute z-10 top-full left-0 w-full bg-white dark:bg-[#2E2E2E] border border-[#11C7FF] dark:border-[#2DE96C] rounded-lg mt-2 shadow-lg">
-                      {/* <div
-                        className="p-2 cursor-pointer hover:bg-[#F0F0F0] dark:hover:bg-[#3A3A3A] rounded-t-lg"
-                        onClick={() => handleSelectOption("HAM")}
-                      >
-                        HAM
-                      </div> */}
                       <div
                         className="p-2 cursor-pointer hover:bg-[#F0F0F0] dark:hover:bg-[#3A3A3A]"
                         onClick={() => handleSelectOption("BNB")}

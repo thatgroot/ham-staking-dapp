@@ -122,7 +122,8 @@ export const ReferralService = {
       name,
       by,
       byParent,
-      groupStakes: 0,
+      groupBNBStakes: 0,
+      groupUSDTStakes: 0,
       createdAt: Date.now(),
     };
     await setDoc(doc(this.usersCollection, wallet), userData);
@@ -169,7 +170,7 @@ export const ReferralService = {
 
     return refCode;
   },
-  async getReferrals(wallet: string): Promise<Referral> {
+  async getReferrals(wallet: string): Promise<Referral | undefined> {
     const buildReferralTree = async (
       userId: string,
       depth: number,
@@ -219,7 +220,7 @@ export const ReferralService = {
 
     // Ensure that the return type is always a Referral
     if (!rootNode) {
-      throw new Error(`No referral data found for wallet: ${wallet}`);
+      return;
     }
 
     return rootNode;
@@ -278,6 +279,15 @@ export const ReferralService = {
     }
 
     return rootNode;
+  },
+  async getDirectReferralsCount(code: string): Promise<number> {
+    const invitedUsersQuery = query(
+      this.usersCollection,
+      where("by", "==", code)
+    );
+    const invitedUsersSnapshot = await getDocs(invitedUsersQuery);
+
+    return invitedUsersSnapshot.docs.length;
   },
   async getReferralTree(wallet: string, maxDepth: number): Promise<Referral> {
     const buildReferralTree = async (
@@ -353,7 +363,7 @@ export const ReferralService = {
 
     return null;
   },
-  async _getParentReferrals(wallet: string): Promise<Referral> {
+  async getParentReferrals(wallet: string): Promise<Referral> {
     const buildReferralTree = async (
       userId: string,
       depth: number,
@@ -527,20 +537,25 @@ export const ReferralService = {
     return countReferrals(wallet, 0, new Set<string>());
   },
 
-  async getTeamStakes(by: string): Promise<number> {
+  async getTeamStakes(by: string): Promise<{ bnb: number; usdt: number }> {
     const invitedUsersQuery = query(
       this.usersCollection,
       where("by", "==", by)
     );
 
     const invitedUsersSnapshot = await getDocs(invitedUsersQuery);
-    let totalStakes = 0;
+    let totalUSDTStakes = 0;
+    let totalBNBStakes = 0;
     for (const doc of invitedUsersSnapshot.docs) {
       const childRefData = doc.data() as UserData;
-      totalStakes += childRefData.groupStakes ?? 0;
+      totalUSDTStakes += childRefData.groupUSDTStakes ?? 0;
+      totalBNBStakes += childRefData.groupBNBStakes ?? 0;
     }
 
-    return totalStakes;
+    return {
+      bnb: totalBNBStakes,
+      usdt: totalUSDTStakes,
+    };
   },
   async getReferralDataWithCount(
     wallet: string

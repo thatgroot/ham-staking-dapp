@@ -1,22 +1,26 @@
 "use client";
 
 import { useState, useEffect, useRef, ChangeEvent } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, LoaderCircle } from "lucide-react";
 import { Tether } from "iconsax-react";
 import {
   useAccount,
+  useBalance,
+  useReadContract,
   useSendTransaction,
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
-import { DEFAULT_CHAIN_ID } from "@/config/wagmi";
+import { DEFAULT_CHAIN_ID, MAIN_WALLET } from "@/config/wagmi";
 import { UserService } from "@/services/user";
 
-import { erc20Abi, parseEther } from "viem";
+import { erc20Abi, formatEther, parseEther } from "viem";
 import { USDT } from "@/config/coins";
 import { notify } from "@/utils/notifications";
-const MIN_LIMIT = 0.01;
+
 export default function Staking() {
+  const { address } = useAccount();
+
   const {
     data: hash,
     isPending,
@@ -26,6 +30,21 @@ export default function Staking() {
   } = useSendTransaction();
 
   const { data: contractHash, writeContract } = useWriteContract();
+  const [usdtBalance, setUSDTBalance] = useState(0);
+  const [BNBBalance, setBNBBalance] = useState(0);
+  const { isFetched: fetchedBalance, data } = useReadContract({
+    abi: erc20Abi,
+    address: USDT,
+    functionName: "balanceOf",
+    args: [address as `0x${string}`],
+    account: address,
+    chainId: DEFAULT_CHAIN_ID,
+  });
+
+  const { isFetched: fetchedBNBBalance, data: bnbData } = useBalance({
+    address,
+    chainId: DEFAULT_CHAIN_ID,
+  });
 
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
@@ -40,8 +59,6 @@ export default function Staking() {
     chainId: DEFAULT_CHAIN_ID,
     hash: contractHash,
   });
-
-  const { address } = useAccount();
 
   const [stakeData, setStakeData] = useState<{
     amount: number;
@@ -67,7 +84,16 @@ export default function Staking() {
   };
 
   const handleAmountChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = Math.max(MIN_LIMIT, Math.min(1000, Number(e.target.value)));
+    const MAX_LIMIT = stakeData.coin === "BNB" ? BNBBalance : usdtBalance;
+
+    if (+e.target.value > MAX_LIMIT) {
+      notify({
+        content: `You can't stake more than ${MAX_LIMIT} ${stakeData.coin}`,
+        type: "error",
+      });
+      return;
+    }
+    const value = +e.target.value;
     setStakeData((prev) => ({ ...prev, amount: value }));
   };
 
@@ -94,7 +120,7 @@ export default function Staking() {
   const calculateTotalAPY = () => {
     const dailyRate = durationRates[stakeData.duration];
     const days = stakeData.duration;
-    return (dailyRate * days).toFixed(2);
+    return (dailyRate * days).toFixed(4);
   };
 
   // Calculate unlock date based on duration
@@ -113,7 +139,7 @@ export default function Staking() {
     function stakeBNB() {
       if (!address || isPending) return;
       sendTransaction({
-        to: "0xE36E96A3842039d68794C15ace30ab7C9143ad1A",
+        to: MAIN_WALLET,
         value: parseEther(stakeData.amount.toString()),
       });
     }
@@ -124,13 +150,27 @@ export default function Staking() {
         address: USDT,
         abi: erc20Abi,
         functionName: "transfer",
-        args: [
-          "0xE36E96A3842039d68794C15ace30ab7C9143ad1A",
-          parseEther(stakeData.amount.toString()),
-        ],
+        args: [MAIN_WALLET, parseEther(stakeData.amount.toString())],
       });
     }
-
+    if (
+      stakeData.amount >=
+        (stakeData.coin === "BNB" ? BNBBalance : usdtBalance) ||
+      stakeData.amount == 0
+    ) {
+      notify({
+        content: "You can't stake more than your balance",
+        type: "error",
+      });
+      return;
+    }
+    if (stakeData.amount < 50 || stakeData.amount > 1000) {
+      notify({
+        content: "Staking amount limit is 50 USDT - 1000 USDT",
+        type: "error",
+      });
+      return;
+    }
     if (stakeData.coin === "USDT") {
       stakeUSDT();
     } else {
@@ -147,7 +187,7 @@ export default function Staking() {
             name: "",
             coin: "BNB",
             wallet: address,
-            amount: stakeData.amount,
+            amount: +stakeData.amount.toFixed(4),
             duration: stakeData.duration,
             stakedOn: Date.now().toString(),
           },
@@ -165,14 +205,13 @@ export default function Staking() {
   useEffect(() => {
     async function updateStakeInfo() {
       if (isUSDTTransferConfirmed && address) {
-        console.log("isUSDTTransferConfirmed", isUSDTTransferConfirmed);
         await UserService.addStakeInfo({
           wallet: address,
           stakeData: {
             name: "",
             coin: "USDT",
             wallet: address,
-            amount: stakeData.amount,
+            amount: +stakeData.amount.toFixed(4),
             duration: stakeData.duration,
             stakedOn: Date.now().toString(),
           },
@@ -186,6 +225,19 @@ export default function Staking() {
     }
     updateStakeInfo();
   }, [isUSDTTransferConfirmed]);
+
+  useEffect(() => {
+    console.log("data", data);
+    if (fetchedBalance && data) {
+      setUSDTBalance(+formatEther(data ?? "0"));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (fetchedBNBBalance && bnbData) {
+      setBNBBalance(+formatEther(bnbData.value ?? "0"));
+    }
+  }, []);
 
   return (
     <div className="max-w-4xl mx-auto space-y-4 md:space-y-6">
@@ -243,12 +295,16 @@ export default function Staking() {
               type="number"
               value={stakeData.amount}
               onChange={handleAmountChange}
+              max={stakeData.coin === "BNB" ? BNBBalance : usdtBalance}
               className="bg-transparent text-2xl font-medium md:w-[150px] w-[90px] focus:outline-none dark:text-white text-black"
             />
           </div>
           <div className="dark:text-gray-400 text-black flex flex-col items-end gap-2">
-            <span className="text-sm">Balance: 0</span>
-            <span className="text-sm">~ 124.3 USD</span>
+            {stakeData.coin === "BNB" ? (
+              <span className="text-sm">~ {BNBBalance.toFixed(4)} BNB</span>
+            ) : (
+              <span className="text-sm">~ {usdtBalance.toFixed(4)} USDT</span>
+            )}
           </div>
         </div>
         <p className="mt-2 text-xs text-gray-500">
@@ -343,9 +399,11 @@ export default function Staking() {
             }}
             className="px-6 w-full py-2 bg-[#11C7FF] text-black rounded-lg text-sm md:text-lg min-w-[150px] uppercase  font-sem transition-all duration-300 dark:bg-[#2DE995] shadow-lg hover:bg-[#0FB8EC] focus:outline-none focus:ring-2 focus:ring-[#11C7FF] focus:ring-opacity-50"
           >
-            {isConfirmingUSDTTransfer || isConfirming
-              ? "Confirming..."
-              : "Stake"}
+            {isConfirmingUSDTTransfer || isConfirming ? (
+              <LoaderCircle className="h-6 w-6 animate-spin" />
+            ) : (
+              "Stake"
+            )}
           </button>
         </div>
       </div>
