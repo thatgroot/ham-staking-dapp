@@ -10,19 +10,11 @@ import {
 
 import { updateDoc } from "firebase/firestore";
 import { db } from "./firebase";
+import { StatisticService } from "./statistic";
 
 export const ReferralService = {
   usersCollection: collection(db, "users"),
-  userCountCollection: collection(db, "userCount"),
-  async getTotalUsers(): Promise<number> {
-    const countSnapshot = await getDoc(doc(this.userCountCollection, "count"));
-    if (countSnapshot.exists()) {
-      const data = countSnapshot.data() as { count: number };
-      return data.count;
-    } else {
-      return 0;
-    }
-  },
+
   async generateReferralCode(length = 8): Promise<string> {
     const chars =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -127,15 +119,9 @@ export const ReferralService = {
       createdAt: Date.now(),
     };
     await setDoc(doc(this.usersCollection, wallet), userData);
-    const countSnapshot = await getDoc(doc(this.userCountCollection, "count"));
-    if (countSnapshot.exists()) {
-      const data = countSnapshot.data() as { count: number };
-      updateDoc(doc(this.userCountCollection, "count"), {
-        count: data.count + 1,
-      });
-    } else {
-      await setDoc(doc(this.userCountCollection, "count"), { count: 1 });
-    }
+
+    await StatisticService.updateStakes({ userCount: 1 });
+
     return {
       exists: false,
       created: true,

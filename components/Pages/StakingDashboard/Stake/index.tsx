@@ -3,63 +3,16 @@
 import { useState, useEffect, useRef, ChangeEvent } from "react";
 import { ChevronDown, LoaderCircle } from "lucide-react";
 import { Tether } from "iconsax-react";
-import {
-  useAccount,
-  useBalance,
-  useReadContract,
-  useSendTransaction,
-  useWaitForTransactionReceipt,
-  useWriteContract,
-} from "wagmi";
+import { useAccount, useBalance } from "wagmi";
 import { DEFAULT_CHAIN_ID, MAIN_WALLET } from "@/config/wagmi";
 import { UserService } from "@/services/user";
 
-import { erc20Abi, formatEther, parseEther } from "viem";
-import { USDT } from "@/config/coins";
+import { formatEther } from "viem";
 import { notify } from "@/utils/notifications";
+import { useSendBnb, useSendUSTD, useUSDTBalance } from "@/hooks/transactions";
 
 export default function Staking() {
   const { address } = useAccount();
-
-  const {
-    data: hash,
-    isPending,
-    sendTransaction,
-    // status,
-    // submittedAt,
-  } = useSendTransaction();
-
-  const { data: contractHash, writeContract } = useWriteContract();
-  const [usdtBalance, setUSDTBalance] = useState(0);
-  const [BNBBalance, setBNBBalance] = useState(0);
-  const { isFetched: fetchedBalance, data } = useReadContract({
-    abi: erc20Abi,
-    address: USDT,
-    functionName: "balanceOf",
-    args: [address as `0x${string}`],
-    account: address,
-    chainId: DEFAULT_CHAIN_ID,
-  });
-
-  const { isFetched: fetchedBNBBalance, data: bnbData } = useBalance({
-    address,
-    chainId: DEFAULT_CHAIN_ID,
-  });
-
-  const { isLoading: isConfirming, isSuccess: isConfirmed } =
-    useWaitForTransactionReceipt({
-      chainId: DEFAULT_CHAIN_ID,
-      hash: hash,
-    });
-
-  const {
-    isLoading: isConfirmingUSDTTransfer,
-    isSuccess: isUSDTTransferConfirmed,
-  } = useWaitForTransactionReceipt({
-    chainId: DEFAULT_CHAIN_ID,
-    hash: contractHash,
-  });
-
   const [stakeData, setStakeData] = useState<{
     amount: number;
     duration: StakeDuration;
@@ -68,6 +21,23 @@ export default function Staking() {
     amount: 50,
     duration: 200,
     coin: "USDT",
+  });
+
+  const { sendBnb, isConfirmed, isConfirming, isPending } = useSendBnb();
+
+  const {
+    isLoading: isConfirmingUSDTTransfer,
+    isSuccess: isUSDTTransferConfirmed,
+    sendUSTD,
+  } = useSendUSTD();
+
+  const [BNBBalance, setBNBBalance] = useState(0);
+
+  const { usdtBalance } = useUSDTBalance(address as `0x${string}`);
+
+  const { isFetched: fetchedBNBBalance, data: bnbData } = useBalance({
+    address,
+    chainId: DEFAULT_CHAIN_ID,
   });
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -110,12 +80,6 @@ export default function Staking() {
     setIsDropdownOpen((prev) => !prev);
   };
 
-  // const handleClickOutside = (e) => {
-  //   if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-  //     setIsDropdownOpen(false);
-  //   }
-  // };
-
   // Calculate total APY based on daily rate and duration
   const calculateTotalAPY = () => {
     const dailyRate = durationRates[stakeData.duration];
@@ -138,20 +102,12 @@ export default function Staking() {
   function stakeCoin() {
     function stakeBNB() {
       if (!address || isPending) return;
-      sendTransaction({
-        to: MAIN_WALLET,
-        value: parseEther(stakeData.amount.toString()),
-      });
+      sendBnb(MAIN_WALLET, stakeData.amount);
     }
 
     function stakeUSDT() {
       if (!address || isPending) return;
-      writeContract({
-        address: USDT,
-        abi: erc20Abi,
-        functionName: "transfer",
-        args: [MAIN_WALLET, parseEther(stakeData.amount.toString())],
-      });
+      sendUSTD(MAIN_WALLET, stakeData.amount);
     }
     if (
       stakeData.amount >=
@@ -164,13 +120,13 @@ export default function Staking() {
       });
       return;
     }
-    if (stakeData.amount < 50 || stakeData.amount > 1000) {
-      notify({
-        content: "Staking amount limit is 50 USDT - 1000 USDT",
-        type: "error",
-      });
-      return;
-    }
+    // if (stakeData.amount < 50 || stakeData.amount > 1000) {
+    //   notify({
+    //     content: "Staking amount limit is 50 USDT - 1000 USDT",
+    //     type: "error",
+    //   });
+    //   return;
+    // }
     if (stakeData.coin === "USDT") {
       stakeUSDT();
     } else {
@@ -225,13 +181,6 @@ export default function Staking() {
     }
     updateStakeInfo();
   }, [isUSDTTransferConfirmed]);
-
-  useEffect(() => {
-    console.log("data", data);
-    if (fetchedBalance && data) {
-      setUSDTBalance(+formatEther(data ?? "0"));
-    }
-  }, []);
 
   useEffect(() => {
     if (fetchedBNBBalance && bnbData) {

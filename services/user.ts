@@ -11,6 +11,7 @@ import {
 } from "firebase/firestore";
 import { db } from "./firebase";
 import { calculateCommissionsForParents } from "@/utils/comission-calculation";
+import { StatisticService } from "./statistic";
 const usersCollection = collection(db, "users");
 const WITHDRAW_COLLECTION = collection(db, "withdraw_requests");
 
@@ -111,17 +112,17 @@ export const UserService = {
         }
       }
 
-      const commissionCalculations = await calculateCommissionsForParents(
-        wallet,
-        value,
-        coin
-      );
-      console.log("commissionCalculations", commissionCalculations);
+      const commissionCalculations: {
+        [key: string]: number;
+      } = await calculateCommissionsForParents(wallet, value, coin);
+      let accumulatedCommissions = 0;
+
       for (const wallet in commissionCalculations) {
         if (
           Object.prototype.hasOwnProperty.call(commissionCalculations, wallet)
         ) {
           const comission = commissionCalculations[wallet];
+          accumulatedCommissions += comission;
 
           batch.update(doc(collection(db, "users"), wallet), {
             [referralEarningType]: +comission.toFixed(4),
@@ -133,8 +134,15 @@ export const UserService = {
           });
         }
       }
+      await StatisticService.updateStakes({
+        bnbStakes: coin === "BNB" ? value : 0,
+        usdtStakes: coin === "USDT" ? value : 0,
+        usdtreferralEarning: coin === "USDT" ? accumulatedCommissions : 0,
+        bnbreferralEarning: coin === "BNB" ? accumulatedCommissions : 0,
+      });
 
       batch.commit();
+
       return true;
     } catch (error) {
       console.error("Error adding NFT:", error);
@@ -144,24 +152,40 @@ export const UserService = {
   requestWithdraw: async (info: Withdraw): Promise<boolean> => {
     const { requestedBy, requestedOn } = info;
 
-    const withdrawDoc = doc(WITHDRAW_COLLECTION, requestedBy);
+    const requestType =
+      info.type === "Referral Earning" ? "ReferralEarning" : "StakingAPY";
 
+    const requestedKey: keyof UserWithdraws = `totalRequested${requestType}${info.coin}`;
+    const acceptedKey: keyof UserWithdraws = `totalAccepted${requestType}${info.coin}`;
+    const withdrawDoc = doc(WITHDRAW_COLLECTION, requestedBy);
     const existingSnapshot = await getDoc(withdrawDoc);
 
     try {
       if (existingSnapshot.exists()) {
         const oldWithdraws = existingSnapshot.data() as UserWithdraws;
+        console.log(
+          "requestedKey",
+          requestedKey,
+          oldWithdraws[requestedKey],
+          +info.amount,
+          oldWithdraws[requestedKey] + +info.amount
+        );
+
         await updateDoc(withdrawDoc, {
           ...oldWithdraws,
           [requestedOn]: {
             ...info,
           },
+          [acceptedKey]: oldWithdraws[acceptedKey] ?? 0,
+          [requestedKey]: (oldWithdraws[requestedKey] ?? 0) + info.amount,
         });
       } else {
         await setDoc(withdrawDoc, {
           [requestedOn]: {
             ...info,
           },
+          [acceptedKey]: 0,
+          [requestedKey]: +info.amount,
         });
       }
       return true;

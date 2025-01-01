@@ -36,8 +36,7 @@ const Button = ({
 
   return (
     <button onClick={onClick} className={buttonClasses} disabled={disabled}>
-      {icon && <div className="w-[20px]"> {icon} </div>}
-
+      {!icon == "undefined" && <div className="w-[20px]"> {icon} </div>}
       {children}
     </button>
   );

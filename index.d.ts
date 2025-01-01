@@ -1,7 +1,7 @@
 interface FlexProps
   extends React.HTMLAttributes<HTMLElement>,
     React.CSSProperties {
-  as?: "div" | "main" | "nav";
+  as?: "div" | "main" | "nav" | "button";
   alignItems?: CSSProperties["alignItems"];
   justifyContent?: CSSProperties["justifyContent"];
   flexWrap?: CSSProperties["flexWrap"];
@@ -58,7 +58,7 @@ interface UserData {
    */
   createdAt?: number;
 }
-
+type EarningType = "Staking APY" | "Referral Earning";
 interface Referral {
   level: number;
   data: UserData;
@@ -71,15 +71,32 @@ interface ReferralData {
 }
 
 interface Withdraw {
-  type: "Staking APY" | "Referral Earning";
+  type: EarningType;
   coin: Coin;
   amount: number;
   toWallet: `0x${string}`;
   requestedBy: `0x${string}`;
   requestedOn: number;
+  duration: number;
   status: "requested" | "rejected" | "accepted";
 }
 
 interface UserWithdraws {
   [key: number]: Withdraw;
+  totalRequestedReferralEarningUSDT: number;
+  totalRequestedReferralEarningBNB: number;
+  totalAcceptedReferralEarningUSDT: number;
+  totalAcceptedReferralEarningBNB: number;
+  totalRequestedStakingAPYUSDT: number;
+  totalRequestedStakingAPYBNB: number;
+  totalAcceptedStakingAPYUSDT: number;
+  totalAcceptedStakingAPYBNB: number;
+}
+
+interface Statistic {
+  userCount?: number;
+  bnbStakes?: number;
+  usdtStakes?: number;
+  usdtreferralEarning?: number;
+  bnbreferralEarning?: number;
 }

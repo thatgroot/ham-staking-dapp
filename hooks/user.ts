@@ -1,9 +1,10 @@
 import { db } from "@/services/firebase";
 import { ReferralService } from "@/services/referral";
 import { UserService } from "@/services/user";
-import { collection, doc, getDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
+const WITHDRAW_COLLECTION = collection(db, "withdraw_requests");
 
 export const useAllUsers = () => {
   const [users, setUsers] = useState<UserData[]>([]);
@@ -111,14 +112,73 @@ export const useUserReferrals = () => {
   return { count, loading };
 };
 
-export const useWithdraw = () => {
-  const [, setLoading] = useState(false);
+export const useUserWithdraw = (reload: boolean) => {
+  const { address } = useAccount();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>();
+
+  const [data, setData] = useState<UserWithdraws>();
 
   useEffect(() => {
     setLoading(true);
-  }, []);
+    async function fetchUserWithdraws() {
+      const withdrawDoc = doc(WITHDRAW_COLLECTION, address);
+      const existingSnapshot = await getDoc(withdrawDoc);
 
-  function request() {}
+      if (existingSnapshot.exists()) {
+        const withdraws = existingSnapshot.data() as UserWithdraws;
+        setData(withdraws);
+        setLoading(false);
+      } else {
+        setError("No withdraws found");
+        setLoading(false);
+      }
+    }
+    fetchUserWithdraws();
+  }, [address, reload]);
 
-  return { request };
+  return { data, loading, error };
+};
+
+export const useAllWithdrawRequests = () => {
+  const { address } = useAccount();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>();
+
+  const [data, setData] = useState<Withdraw[]>();
+
+  useEffect(() => {
+    async function fetchUserWithdraws() {
+      setLoading(true);
+      const existingSnapshot = await getDocs(WITHDRAW_COLLECTION);
+      const tempRequestsData = existingSnapshot.docs.map((doc) => {
+        return doc.data() as UserWithdraws;
+      });
+
+      if (tempRequestsData) {
+        const tempWithdrawRequests: Withdraw[] = [];
+
+        tempRequestsData.forEach((userWithdraws) => {
+          Object.keys(userWithdraws)
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
+            .filter((key) => typeof userWithdraws[key] === "object")
+            .forEach((key) => {
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-expect-error
+              const withdrawRequest: Withdraw = userWithdraws[key];
+              tempWithdrawRequests.push(withdrawRequest);
+            });
+          setData(tempWithdrawRequests);
+          setLoading(false);
+        });
+      } else {
+        setError("No withdraws found");
+        setLoading(false);
+      }
+    }
+    fetchUserWithdraws();
+  }, [address]);
+
+  return { data, loading, error };
 };
