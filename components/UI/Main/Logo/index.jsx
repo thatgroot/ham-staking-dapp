@@ -1,5 +1,5 @@
 import Image from "next/image"
-import LogoImg from "@/public/main/logo.png"
+import LogoImg from "@/public/main/hamcoin.png"
 
 const Logo = () => {
   return (

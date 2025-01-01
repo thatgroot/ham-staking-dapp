@@ -2,10 +2,22 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { LoaderCircle } from "lucide-react";
-import { VBox } from "@/components/ui/Directional/flex";
+import { Loader2 } from "lucide-react";
+
 import { ReferralService } from "@/services/referral";
 import { useSignupForm } from "@/hooks/signup";
+// import Button from "@/components/UI/Main/Button";{Butto}
+import { Input } from "@/components/UI/Input";
+import { Label } from "@/components/UI/Label";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/UI/card";
+import { Button } from "../Button";
 
 interface SignUpFormProps {
   wallet: string;
@@ -16,19 +28,17 @@ export function SignUpForm({ wallet, referralCode }: SignUpFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const { formData, handleChange } = useSignupForm(wallet, referralCode);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { by, ...formDataWithoutCode } = formData;
 
-    if (!formDataWithoutCode.name) {
-      //   notify({
-      //     content: "Name is required",
-      //     type: "error",
-      //   });
+    if (!formDataWithoutCode.name || !formDataWithoutCode.email) {
+      setError("Name and email are required");
       setLoading(false);
       return;
     }
@@ -43,53 +53,76 @@ export function SignUpForm({ wallet, referralCode }: SignUpFormProps) {
       await ReferralService.registerUser(formData);
       router.push("/dashboard");
     } catch (error) {
-      // @ts-expect-error['']
-      console.error("Error registering user:", error.message);
-      //   notify({
-      //     content: "Registration failed. Please try again.",
-      //     type: "error",
-      //   });
+      console.error("Error registering user:", error);
+      setError("Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <VBox>
-      <div className="max-w-lg mx-auto bg-white/5 p-6 rounded-lg shadow-md mb-6">
-        <VBox gap={24}>
-          <div className="bg-white/10 text-white px-4 py-2 rounded-full w-full">
-            {wallet}
+    <Card className="w-full max-w-md mx-auto h-fit bg-black">
+      <CardHeader>
+        <CardTitle>Sign Up</CardTitle>
+        <CardDescription>Create your account to get started</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="wallet">Wallet Address</Label>
+            <Input
+              id="wallet"
+              value={wallet}
+              readOnly
+              className="bg-gray-100"
+            />
           </div>
-          <input
-            className="bg-white/10 text-black px-4 py-2 rounded-full w-full focus:outline-none focus:ring-2 focus:ring-[#85CD4F]"
-            required
-            name="name"
-            type="text"
-            onChange={handleChange}
-            placeholder="Name"
-          />
-          <input
-            className="bg-white/10 text-black px-4 py-2 rounded-full w-full focus:outline-none focus:ring-2 focus:ring-[#85CD4F]"
-            required
-            name="by"
-            type="text"
-            onChange={handleChange}
-            placeholder="Referral Code"
-            defaultValue={referralCode ?? ""}
-          />
-          <button
-            onClick={handleSubmit}
-            className="bg-[#85CD4F] text-center px-6 py-2 hover:bg-[#6ba33f] text-white rounded-full font-semibold transition duration-300"
-          >
+          <div>
+            <Label htmlFor="name">Name</Label>
+            <Input
+              id="name"
+              name="name"
+              type="text"
+              required
+              placeholder="Enter your name"
+              onChange={handleChange}
+            />
+          </div>
+          <div>
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              required
+              placeholder="Enter your email"
+              onChange={handleChange}
+            />
+          </div>
+          <div>
+            <Label htmlFor="referralCode">Referral Code</Label>
+            <Input
+              id="referralCode"
+              name="by"
+              type="text"
+              placeholder="Enter referral code (optional)"
+              defaultValue={referralCode ?? ""}
+              onChange={handleChange}
+            />
+          </div>
+          {error && <p className="text-sm font-medium text-red-600">{error}</p>}
+          <Button type="submit" className="w-full" disabled={loading}>
             {loading ? (
-              <LoaderCircle className="animate-spin h-5 w-5 mx-auto" />
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Signing Up...
+              </>
             ) : (
-              <span>ProceedSignUp</span>
+              "Sign Up"
             )}
-          </button>
-        </VBox>
-      </div>
-    </VBox>
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

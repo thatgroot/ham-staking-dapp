@@ -1,15 +1,15 @@
-import SwapIcon from "@/public/main/swap.svg";
-import StakeIcon from "@/public/main/stake.svg";
-import GamingIcon from "@/public/main/gaming.svg";
-import SlotIcon from "@/public/main/hamslot.svg";
-import PayIcon from "@/public/main/hampay.svg";
-import NftsIcon from "@/public/main/nfts.svg";
+import SwapIcon from "@/public/main/revenuesystem/swap.png";
+import StakeIcon from "@/public/main/revenuesystem/staking.png";
+import GamingIcon from "@/public/main/revenuesystem/game.png";
+import SlotIcon from "@/public/main/revenuesystem/slot.png";
+import PayIcon from "@/public/main/revenuesystem/pay.png";
+import NftsIcon from "@/public/main/revenuesystem/nft.png";
 import Image from "next/image";
-import bg1 from "@/public/assets/s1.svg";
-import bg2 from "@/public/assets/s2.svg";
-import bg3 from "@/public/assets/s3.svg";
-import bg5 from "@/public/assets/s36.svg";
-import bg6 from "@/public/assets/s6.svg";
+import bg1 from "@/public/main/revenuesystem/s1.svg";
+import bg2 from "@/public/main/revenuesystem/s2.svg";
+import bg3 from "@/public/main/revenuesystem/s3.svg";
+import bg5 from "@/public/main/revenuesystem/s36.svg";
+import bg6 from "@/public/main/revenuesystem/s6.svg";
 
 const revenueData = [
   {

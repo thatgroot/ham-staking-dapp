@@ -1,9 +1,9 @@
 import nftBg from "@/public/main/nftBg.png";
 import Image from "next/image";
-import Nft1 from "@/public/main/nft1.jpeg";
-import Nft2 from "@/public/main/nft2.jpeg";
-import Nft3 from "@/public/main/nft3.jpeg";
-import Nft4 from "@/public/main/nft4.jpeg";
+import Nft1 from "@/public/main/Nfts/nft1.jpeg";
+import Nft2 from "@/public/main/Nfts/nft2.jpeg";
+import Nft3 from "@/public/main/Nfts/nft3.jpeg";
+import Nft4 from "@/public/main/Nfts/nft4.jpeg";
 
 const Mint = () => {
   const nfts = [

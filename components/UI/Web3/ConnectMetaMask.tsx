@@ -13,6 +13,9 @@ export function ConnectMetaMask() {
       {account.status === "connected" ? (
         <Button onClick={() => disconnect()} icon={<Wallet />}>
           <span>Disconnect</span>
+          <div>
+            {account.address.slice(0, 4)}...{account.address.slice(-4)}
+          </div>
         </Button>
       ) : (
         <Button
