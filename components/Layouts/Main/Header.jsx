@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Button from "@/components/ui/Main/Button";
-import { MenuIcon, Wallet } from "lucide-react";
+import { MenuIcon, Wallet, X } from "lucide-react";
 import Link from "next/link";
 import Logo from "@/components/ui/Main/Logo";
 import { ConnectMetaMask } from "@/components/ui/Web3/ConnectMetaMask";
@@ -63,14 +63,22 @@ const Header = () => {
             )}
           </ul>
 
-          <ConnectMetaMask />
-
           <div className="flex items-center gap-5 relative">
-            <MenuIcon
-              size={25}
-              className="lg:block  text-2xl cursor-pointer"
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-            />
+            <ConnectMetaMask />
+
+            {dropdownOpen ? (
+              <X
+                size={25}
+                className="lg:block text-2xl cursor-pointer"
+                onClick={() => setDropdownOpen(false)}
+              />
+            ) : (
+              <MenuIcon
+                size={25}
+                className="lg:block text-2xl cursor-pointer"
+                onClick={() => setDropdownOpen(true)}
+              />
+            )}
             <AnimatePresence>
               {dropdownOpen && (
                 <>
@@ -82,18 +90,32 @@ const Header = () => {
                     animate="visible"
                     exit="hidden"
                   >
-                    {["Ham Staking", "Ham Pay", "Ham Swap", "Ham NFTs"].map(
-                      (item, index) => (
-                        <li key={index}>
-                          <Link
-                            href={`#${item.toLowerCase().replace(/\s+/g, "")}`}
-                            className="block px-4 py-2 hover:bg-gray-100 rounded-lg"
-                          >
-                            {item}
-                          </Link>
-                        </li>
-                      )
-                    )}
+                    {/* Dropdown Items */}
+                    {[
+                      { name: "Ham Staking", available: true },
+                      { name: "Ham Nfts", available: true },
+                      { name: "Ham Token", available: false },
+                      { name: "Metaverse", available: false },
+                      { name: "Ham Pay", available: false },
+                    ].map((item, index) => (
+                      <li key={index}>
+                        <Link
+                          href={""}
+                          className={`block overflow-hidden relative px-4 py-2 border ${
+                            item.available
+                              ? "hover:bg-gray-100"
+                              : "cursor-default"
+                          } rounded-lg`}
+                        >
+                          {item.name}
+                          {!item.available && (
+                            <div className="text-xs absolute right-0 top-0  bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-gradient-text text-white rounded-bl-md p-px">
+                              Coming Soon
+                            </div>
+                          )}
+                        </Link>
+                      </li>
+                    ))}
                   </motion.ul>
                 </>
               )}

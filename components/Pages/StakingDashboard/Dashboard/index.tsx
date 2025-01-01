@@ -2,11 +2,11 @@
 import hamReward from "@/public/assets/refferralRewards.png";
 import refferalEarning from "@/public/assets/totalearning.png";
 import totalFriends from "@/public/assets/friends.png";
-import Card from "@/components/ui/Dashboard/Card";
+import Card from "@/components/UI/Dashboard/Card";
 import Image from "next/image";
 import Calculator from "./components/Calculator";
 import { useUserData, useUserReferrals } from "@/hooks/user";
-import { HBox, VBox } from "@/components/ui/Directional/flex";
+import { HBox, VBox } from "@/components/UI/Directional/flex";
 import { notify } from "@/utils/notifications";
 import { ReferralsPage } from "../../Referrals";
 import { MyStakes } from "../Stake/MyStakes";
@@ -19,7 +19,7 @@ const Dashboard = () => {
     <div className="space-y-6">
       {/* Cards Section */}
       {user && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-6">
           <Card
             title={"BNB Stakes"}
             icon={

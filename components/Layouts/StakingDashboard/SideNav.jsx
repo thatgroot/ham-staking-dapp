@@ -4,26 +4,40 @@ import Dashboard from "@/public/assets/dashboard.svg";
 import Staking from "@/public/assets/staking.svg";
 import Swap from "@/public/assets/swap.svg";
 import Withdraw from "@/public/assets/withdraw.svg";
+import User from "@/public/assets/admin.svg";
+
 import Image from "next/image";
 import { CloseSquare } from "iconsax-react";
 import ThemeToggler from "@/components/ui/Dashboard/ThemeChanger";
 import { X } from "lucide-react";
 import PoweredByBnb from "@/components/ui/Main/PoweredByBnb";
-
-const menuItems = [
-  {
-    icon: Dashboard,
-    label: "Dashboard",
-    href: "/dashboard",
-  },
-  { icon: Staking, label: "Staking", href: "/stake" },
-  { icon: Swap, label: "Swap", href: "/swap" },
-  { icon: Withdraw, label: "Withdraw", href: "/withdraw" },
-];
+import { useAccount } from "wagmi";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
 const Sidenav = ({ onClose, open }) => {
   const router = useRouter();
   const currentPath = usePathname();
+  const { address } = useAccount();
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    if (!address) return;
+    // if (address === "0x8c462b0fb450b64603Fc6BFDe6455D4f8e258c3A") {
+      if(address=== "0xF69c12BCAb3cc3Bef5a5BF7eD990B26dA2871D55"){
+      setIsAdmin(true);
+    }
+  }, [address]);
+  const menuItems = [
+    {
+      icon: Dashboard,
+      label: "Dashboard",
+      href: "/dashboard",
+    },
+    { icon: Staking, label: "Staking", href: "/stake" },
+    { icon: Swap, label: "Swap", href: "/swap" },
+    { icon: Withdraw, label: "Withdraw", href: "/withdraw" },
+  ];
 
   return (
     <div
@@ -40,47 +54,90 @@ const Sidenav = ({ onClose, open }) => {
         </div>
         <nav className="mt-4">
           {menuItems.map((item) => (
-            <div key={item.href} className="flex items-center">
-              <button
-                onClick={() => {
-                  router.push(item.href);
-                }}
-                className={`${
-                  currentPath === item.href
-                    ? "  text-[#00C3FF] dark:text-[#00C3FF] bg-[#00C3FF]/10  px-8 py-4"
-                    : "px-6 py-4"
-                } relative w-full flex gap-4 items-center h-full   hover:bg-[#00C3FF]/10 transition-colors mx-auto`}
-              >
-                {currentPath === item.href && (
-                  <div className="absolute top-0  left-0 w-1 bg-[#00C3FF] dark:bg-[#6AEDE0] h-full rounded-r-sm"></div>
-                )}
-                <Image
-                  src={item.icon}
-                  alt={item.label}
-                  className={`w-6   ${
+            <Link key={item.href} href={item.href}>
+              <div className="flex items-center">
+                <button
+                  className={`${
                     currentPath === item.href
-                      ? "opacity-100 dark:opacity-100 "
-                      : "opacity-20 dark:opacity-50"
-                  } ${
-                    currentPath === item.href
-                      ? "filter brightness-110" // Slightly brightens the icon for active state
-                      : ""
-                  } ${open ? "filter dark:invert" : "filter dark:invert"} ${
-                    currentPath === item.href
-                      ? "filter dark:invert brightness-110"
-                      : ""
-                  }`}
-                />
-                <span
-                  className={`text-lg font-medium  text-black dark:text-white ${
-                    currentPath === item.href ? "opacity-100" : "opacity-40"
-                  }`}
+                      ? "  text-[#00C3FF] dark:text-[#00C3FF] bg-[#00C3FF]/10  px-8 py-4"
+                      : "px-6 py-4"
+                  } relative w-full flex gap-4 items-center h-full   hover:bg-[#00C3FF]/10 transition-colors mx-auto`}
                 >
-                  {item.label}
-                </span>
-              </button>
-            </div>
+                  {currentPath === item.href && (
+                    <div className="absolute top-0  left-0 w-1 bg-[#00C3FF] dark:bg-[#6AEDE0] h-full rounded-r-sm"></div>
+                  )}
+                  <Image
+                    src={item.icon}
+                    alt={item.label}
+                    className={`w-6   ${
+                      currentPath === item.href
+                        ? "opacity-100 dark:opacity-100 "
+                        : "opacity-20 dark:opacity-50"
+                    } ${
+                      currentPath === item.href
+                        ? "filter brightness-110" // Slightly brightens the icon for active state
+                        : ""
+                    } ${open ? "filter dark:invert" : "filter dark:invert"} ${
+                      currentPath === item.href
+                        ? "filter dark:invert brightness-110"
+                        : ""
+                    }`}
+                  />
+                  <span
+                    className={`text-lg font-medium  text-black dark:text-white ${
+                      currentPath === item.href ? "opacity-100" : "opacity-40"
+                    }`}
+                  >
+                    {item.label}
+                  </span>
+                </button>
+              </div>
+            </Link>
           ))}
+          {isAdmin && (
+            <Link href={"/admin-panel"}>
+              <div className="flex items-center">
+                <button
+                  className={`${
+                    currentPath === "/admin-panel"
+                      ? "  text-[#00C3FF] dark:text-[#00C3FF] bg-[#00C3FF]/10  px-8 py-4"
+                      : "px-6 py-4"
+                  } relative w-full flex gap-4 items-center h-full   hover:bg-[#00C3FF]/10 transition-colors mx-auto`}
+                >
+                  {currentPath === "/admin-panel" && (
+                    <div className="absolute top-0  left-0 w-1 bg-[#00C3FF] dark:bg-[#6AEDE0] h-full rounded-r-sm"></div>
+                  )}
+                  <Image
+                    src={User}
+                    alt={"admin"}
+                    className={`w-6   ${
+                      currentPath === "/admin-panel"
+                        ? "opacity-100 dark:opacity-100 "
+                        : "opacity-20 dark:opacity-50"
+                    } ${
+                      currentPath === "/admin-panel"
+                        ? "filter brightness-110" // Slightly brightens the icon for active state
+                        : ""
+                    } ${open ? "filter dark:invert" : "filter dark:invert"} ${
+                      currentPath === "/admin-panel"
+                        ? "filter dark:invert brightness-110"
+                        : ""
+                    }`}
+                  />
+                  <span
+                    className={`text-lg font-medium  text-black dark:text-white ${
+                      currentPath === "/admin-panel"
+                        ? "opacity-100"
+                        : "opacity-40"
+                    }`}
+                  >
+                    Admin Panel
+                  </span>
+                </button>
+              </div>
+            </Link>
+          )}
+
           <div className="md:hidden flex items-center justify-center border-t pt-4 mt-4 ">
             <ThemeToggler />
           </div>
