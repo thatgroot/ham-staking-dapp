@@ -7,9 +7,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/UI/table";
+} from "@/components/ui/table";
 import { LoaderCircle } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/UI/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { timeStampToDate } from "@/lib/utils";
 
 export function MyStakes() {
   const { data, loading } = useUserData();
@@ -48,7 +49,7 @@ export function MyStakes() {
                     <TableCell>{stake.amount}</TableCell>
                     <TableCell>{stake.duration} days</TableCell>
                     <TableCell>
-                      {new Date(parseInt(stake.stakedOn)).toLocaleDateString()}
+                      {timeStampToDate(+stake.stakedOn).toLocaleDateString()}
                     </TableCell>
                   </TableRow>
                 );

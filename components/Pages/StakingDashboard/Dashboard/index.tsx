@@ -2,11 +2,11 @@
 import hamReward from "@/public/assets/refferralRewards.png";
 import refferalEarning from "@/public/assets/totalearning.png";
 import totalFriends from "@/public/assets/friends.png";
-import Card from "@/components/UI/Dashboard/Card";
+import Card from "@/components/ui/Dashboard/Card";
 import Image from "next/image";
 import Calculator from "./components/Calculator";
 import { useUserData, useUserReferrals } from "@/hooks/user";
-import { HBox, VBox } from "@/components/UI/Directional/flex";
+import { HBox, VBox } from "@/components/ui/Directional/flex";
 import { notify } from "@/utils/notifications";
 import { ReferralsPage } from "../../Referrals";
 import { MyStakes } from "../Stake/MyStakes";

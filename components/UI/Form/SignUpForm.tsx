@@ -6,17 +6,16 @@ import { Loader2 } from "lucide-react";
 
 import { ReferralService } from "@/services/referral";
 import { useSignupForm } from "@/hooks/signup";
-// import Button from "@/components/UI/Main/Button";{Butto}
-import { Input } from "@/components/UI/Input";
-import { Label } from "@/components/UI/Label";
+// import Button from "@/components/ui/Main/Button";{Butto}
+import { Input } from "@/components/ui/Input";
+import { Label } from "@/components/ui/Label";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
-  CardFooter,
-} from "@/components/UI/card";
+} from "@/components/ui/card";
 import { Button } from "../Button";
 
 interface SignUpFormProps {
@@ -37,7 +36,7 @@ export function SignUpForm({ wallet, referralCode }: SignUpFormProps) {
 
     const { by, ...formDataWithoutCode } = formData;
 
-    if (!formDataWithoutCode.name || !formDataWithoutCode.email) {
+    if (!formDataWithoutCode.name || !formDataWithoutCode.wallet) {
       setError("Name and email are required");
       setLoading(false);
       return;
@@ -88,17 +87,7 @@ export function SignUpForm({ wallet, referralCode }: SignUpFormProps) {
               onChange={handleChange}
             />
           </div>
-          <div>
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              required
-              placeholder="Enter your email"
-              onChange={handleChange}
-            />
-          </div>
+
           <div>
             <Label htmlFor="referralCode">Referral Code</Label>
             <Input

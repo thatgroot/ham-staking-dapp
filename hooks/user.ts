@@ -140,7 +140,7 @@ export const useUserWithdraw = (reload: boolean) => {
   return { data, loading, error };
 };
 
-export const useAllWithdrawRequests = () => {
+export const useAllWithdrawRequests = (reload: boolean) => {
   const { address } = useAccount();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>();
@@ -150,6 +150,7 @@ export const useAllWithdrawRequests = () => {
   useEffect(() => {
     async function fetchUserWithdraws() {
       setLoading(true);
+
       const existingSnapshot = await getDocs(WITHDRAW_COLLECTION);
       const tempRequestsData = existingSnapshot.docs.map((doc) => {
         return doc.data() as UserWithdraws;
@@ -160,12 +161,9 @@ export const useAllWithdrawRequests = () => {
 
         tempRequestsData.forEach((userWithdraws) => {
           Object.keys(userWithdraws)
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
             .filter((key) => typeof userWithdraws[key] === "object")
+            .filter((key) => userWithdraws[key].status === "requested")
             .forEach((key) => {
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-expect-error
               const withdrawRequest: Withdraw = userWithdraws[key];
               tempWithdrawRequests.push(withdrawRequest);
             });
@@ -178,7 +176,42 @@ export const useAllWithdrawRequests = () => {
       }
     }
     fetchUserWithdraws();
-  }, [address]);
+  }, [address, reload]);
+
+  return { data, loading, error };
+};
+
+export const useUserStakes = (reload: boolean) => {
+  const { address } = useAccount();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>();
+
+  const [data, setData] = useState<StakeInfo[]>();
+
+  useEffect(() => {
+    async function fetchUserStakes() {
+      setLoading(true);
+      const userDoc = doc(collection(db, "users"), address);
+      const existingSnapshot = await getDoc(userDoc);
+
+      if (existingSnapshot.exists()) {
+        const userData = existingSnapshot.data() as UserData;
+        if (userData.stakeInfo) {
+          // userData.stakeInfo: Record<string, StakeInfo>
+          const tempStakes: StakeInfo[] = [];
+          Object.keys(userData.stakeInfo).forEach((key) => {
+            tempStakes.push(userData.stakeInfo![key]);
+          });
+          setData(tempStakes);
+        }
+        setLoading(false);
+      } else {
+        setError("No stakes found");
+        setLoading(false);
+      }
+    }
+    fetchUserStakes();
+  }, [address, reload]);
 
   return { data, loading, error };
 };

@@ -5,12 +5,11 @@ import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { BinanceCoin } from "iconsax-react";
-import ThemeToggler from "@/components/UI/Dashboard/ThemeChanger";
+import ThemeToggler from "@/components/ui/Dashboard/ThemeChanger";
 import { menuItems } from "./menu-items";
 import { Menu, X } from "lucide-react";
-import PoweredByBnb from "@/components/UI/Main/PoweredByBnb";
-import { useAccount } from "wagmi";
-import { ConnectMetaMask } from "@/components/UI/Web3/ConnectMetaMask";
+import PoweredByBnb from "@/components/ui/Main/PoweredByBnb";
+import { ConnectMetaMask } from "@/components/ui/Web3/ConnectMetaMask";
 
 const menuVariants = {
   closed: {
@@ -34,8 +33,9 @@ const menuVariants = {
 const Header = () => {
   const currentPath = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const menuRef = useRef(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const pathname = usePathname();
 
   const formattedPath =
     currentPath === "/"
@@ -56,8 +56,8 @@ const Header = () => {
     };
   }, []);
 
-  const handleNavClick = (hash) => {
-    if (router.pathname !== "/") {
+  const handleNavClick = (hash: string) => {
+    if (pathname !== "/") {
       router.push(`/#${hash}`);
     } else {
       const section = document.getElementById(hash);
@@ -124,7 +124,14 @@ const MobileMenuToggle = ({ isOpen, setIsOpen }) => (
   </div>
 );
 
-const MobileMenu = React.forwardRef(
+interface MobileMenuProps {
+  isOpen: boolean;
+  menuItems: { href: string; label: string }[];
+  handleNavClick: (hash: string) => void;
+  pathname: string;
+}
+
+const MobileMenu = React.forwardRef<HTMLDivElement, MobileMenuProps>(
   ({ isOpen, menuItems, handleNavClick, pathname }, ref) => (
     <motion.div
       ref={ref}

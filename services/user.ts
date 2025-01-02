@@ -12,7 +12,7 @@ import {
 import { db } from "./firebase";
 import { calculateCommissionsForParents } from "@/utils/comission-calculation";
 import { StatisticService } from "./statistic";
-const usersCollection = collection(db, "users");
+const USERS_COLLECTION = collection(db, "users");
 const WITHDRAW_COLLECTION = collection(db, "withdraw_requests");
 
 export const UserService = {
@@ -69,7 +69,7 @@ export const UserService = {
        * parent data starts
        */
       const parentQuery = query(
-        usersCollection,
+        USERS_COLLECTION,
         where("code", "==", userData.by)
       );
 
@@ -149,7 +149,63 @@ export const UserService = {
       return false;
     }
   },
-  requestWithdraw: async (info: Withdraw): Promise<boolean> => {
+  updateSpecificStake: async ({
+    wallet,
+    stakedOn,
+    status,
+    withdrawRequestedOn,
+  }: {
+    wallet: string;
+    stakedOn: number;
+    status: StakeStatus;
+    withdrawRequestedOn: number;
+  }): Promise<boolean> => {
+    const currentRef = doc(collection(db, "users"), wallet);
+
+    try {
+      const existingSnapshot = await getDoc(currentRef);
+      if (!existingSnapshot.exists()) {
+        return false;
+      }
+
+      const userData = existingSnapshot.data() as UserData;
+      const { stakeInfo } = userData;
+
+      if (stakeInfo) {
+        await updateDoc(currentRef, {
+          stakeInfo: {
+            ...stakeInfo,
+            [stakedOn]: {
+              ...stakeInfo[stakedOn],
+              status: status,
+            },
+          },
+        });
+
+        const withdrawDoc = doc(WITHDRAW_COLLECTION, wallet);
+        const existingSnapshot = await getDoc(withdrawDoc);
+        if (existingSnapshot.exists()) {
+          const oldWithdraws = existingSnapshot.data() as UserWithdraws;
+
+          await updateDoc(withdrawDoc, {
+            [withdrawRequestedOn]: {
+              ...oldWithdraws[withdrawRequestedOn],
+              status: status,
+              stakeInfo: {
+                ...oldWithdraws[withdrawRequestedOn].stakeInfo,
+                status: status,
+              },
+            },
+          });
+        }
+      }
+      return true;
+    } catch (error) {
+      console.error("Error adding NFT:", error);
+      return false;
+    }
+  },
+  addWithdrawInfo: async (info: Withdraw): Promise<boolean> => {
     const { requestedBy, requestedOn } = info;
 
     const requestType =
@@ -157,19 +213,17 @@ export const UserService = {
 
     const requestedKey: keyof UserWithdraws = `totalRequested${requestType}${info.coin}`;
     const acceptedKey: keyof UserWithdraws = `totalAccepted${requestType}${info.coin}`;
+
     const withdrawDoc = doc(WITHDRAW_COLLECTION, requestedBy);
     const existingSnapshot = await getDoc(withdrawDoc);
 
     try {
+      const userDoc = doc(USERS_COLLECTION, requestedBy);
+      const existingUserSnapshot = await getDoc(userDoc);
+      const userData = existingUserSnapshot.data() as UserData;
+
       if (existingSnapshot.exists()) {
         const oldWithdraws = existingSnapshot.data() as UserWithdraws;
-        console.log(
-          "requestedKey",
-          requestedKey,
-          oldWithdraws[requestedKey],
-          +info.amount,
-          oldWithdraws[requestedKey] + +info.amount
-        );
 
         await updateDoc(withdrawDoc, {
           ...oldWithdraws,
@@ -188,6 +242,21 @@ export const UserService = {
           [requestedKey]: +info.amount,
         });
       }
+
+      if (requestType === "StakingAPY") {
+        await updateDoc(userDoc, {
+          stakeInfo: {
+            ...userData.stakeInfo,
+            [info.stakeInfo.stakedOn]: {
+              ...info.stakeInfo,
+              // only be updated by admin so that only accepted withdraws are updated
+              lastRequestedOn: requestedOn,
+              status: "requested",
+            },
+          },
+        });
+      }
+
       return true;
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {

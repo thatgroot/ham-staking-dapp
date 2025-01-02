@@ -10,7 +10,7 @@ interface FlexProps
 }
 
 type Coin = "USDT" | "BNB";
-
+type StakeStatus = "requested" | "rejected" | "accepted";
 type StakeDuration = 200 | 365 | 500;
 
 interface DistributionEntry {
@@ -22,16 +22,16 @@ interface DistributionEntry {
 interface StakeInfo {
   coin: Coin;
   wallet: string;
-  name: string;
   amount: number;
-  /**
-   * @duration: in days
-   */
   duration: number;
-  /**
-   * @stakedOn: milliseconds string value of date
-   */
-  stakedOn: string;
+  maxApy: number;
+  receivedApy?: number;
+
+  stakedOn: number;
+
+  lastRequestedOn?: number;
+
+  status?: StakeStatus;
 }
 interface UserData {
   name: string;
@@ -44,6 +44,7 @@ interface UserData {
    * user stake info based on timestamp [string]
    */
   stakeInfo?: Record<string, StakeInfo>;
+
   groupUSDTStakes?: number;
   groupBNBStakes?: number;
   stakedBNB?: number;
@@ -78,6 +79,7 @@ interface Withdraw {
   requestedBy: `0x${string}`;
   requestedOn: number;
   duration: number;
+  stakeInfo: StakeInfo;
   status: "requested" | "rejected" | "accepted";
 }
 

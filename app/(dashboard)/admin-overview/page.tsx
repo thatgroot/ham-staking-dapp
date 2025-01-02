@@ -18,6 +18,8 @@ import Button from "@/components/ui/Main/Button";
 import { useSendBnb, useSendUSTD } from "@/hooks/transactions";
 import { HBox, VBox } from "@/components/ui/Directional/flex";
 import { useStatistic } from "@/hooks/statistic";
+import { useEffect, useState } from "react";
+import { UserService } from "@/services/user";
 
 const titles = {
   userCount: "Total Users",
@@ -28,13 +30,33 @@ const titles = {
 };
 // Main Withdraw Component
 const WithdrawScreen = () => {
-  const { data: withdrawRequests, loading } = useAllWithdrawRequests();
-  const { sendBnb } = useSendBnb();
-  const { sendUSTD } = useSendUSTD();
+  const [stakeKey, setStakeKey] = useState<number>();
+
+  const {
+    sendBnb,
+    isConfirmed: isBNBSendConfirmed,
+    isPending: isBNBSendPending,
+  } = useSendBnb();
+  const {
+    isSuccess: isUSDTTransferConfirmed,
+    sendUSTD,
+    isLoading: isUSDTSendPending,
+  } = useSendUSTD();
+  const { data: withdrawRequests, loading } = useAllWithdrawRequests(
+    isUSDTTransferConfirmed || isBNBSendConfirmed
+  );
+
+  const [requestedByWallet, setRequestedByWallet] = useState<string>();
+  const [withdrawRequestedOn, setWithdrawRequestedOn] = useState<number>();
+
   const { statistic } = useStatistic();
 
   function distributeRewards(withdraw: Withdraw) {
-    const { toWallet, coin, type, amount } = withdraw;
+    const { toWallet, coin, type, amount, requestedBy, requestedOn } = withdraw;
+    setStakeKey(withdraw.stakeInfo.stakedOn);
+    setRequestedByWallet(requestedBy);
+    setWithdrawRequestedOn(requestedOn);
+
     if (type === "Referral Earning") {
       if (coin === "BNB") {
         sendBnb(toWallet, amount);
@@ -50,6 +72,21 @@ const WithdrawScreen = () => {
       }
     }
   }
+
+  useEffect(() => {
+    console.log(isBNBSendConfirmed, isUSDTTransferConfirmed);
+    if (isBNBSendConfirmed || isUSDTTransferConfirmed) {
+      if (requestedByWallet && stakeKey && withdrawRequestedOn) {
+        UserService.updateSpecificStake({
+          wallet: requestedByWallet,
+          stakedOn: stakeKey,
+          status: "accepted",
+          withdrawRequestedOn: withdrawRequestedOn,
+        });
+      }
+    }
+  }, [isUSDTTransferConfirmed, isBNBSendConfirmed]);
+
   return (
     <VBox gap={12}>
       <div className="grid grid-cols-4 md:grid-cols-3 gap-4">
@@ -146,20 +183,21 @@ const WithdrawScreen = () => {
                       <TableCell className="font-medium">
                         <HBox gap={12}>
                           <Button
-                            className="w-fit h-[18px] py-4 px-0"
+                            className="w-fit h-[18px] py-4 px-0 text-center"
                             onClick={() => {
                               distributeRewards(withdraw);
                             }}
                             icon={undefined}
                           >
-                            <span>Accept</span>
-                          </Button>
-                          <Button
-                            className="w-fit h-[18px] py-4 px-0"
-                            onClick={() => {}}
-                            icon={undefined}
-                          >
-                            <span>Reject</span>
+                            <span>
+                              {isBNBSendPending || isUSDTSendPending ? (
+                                <>
+                                  <LoaderCircle className="animate-spin h-5 w-5 mr-2" />
+                                </>
+                              ) : (
+                                "Distribute"
+                              )}
+                            </span>
                           </Button>
                         </HBox>
                       </TableCell>
