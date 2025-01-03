@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UserService } from "@/services/user";
-import { useUserData, useUserStakes, useUserWithdraw } from "@/hooks/user";
+import { useUserStakes, useUserWithdraw } from "@/hooks/user";
 import { HBox } from "@/components/ui/Directional/flex";
 import { notify } from "@/utils/notifications";
 import {
@@ -39,20 +39,23 @@ const WithdrawScreen = () => {
 
   const [withdrawRequests, setWithdrawRequests] = useState<Withdraw[]>([]);
   const [requestingWithdraw, setRequestingWithdraw] = useState<boolean>(false);
-  const { data: userStakes, loading: loadingStakes } =
-    useUserStakes(requestingWithdraw);
+  const {
+    data: userStakes,
+    userData: data,
+    loading: loadingStakes,
+  } = useUserStakes(requestingWithdraw);
 
   const {
     data: userWithdraws,
     loading: loadingWithdraws,
     // error: errorWithdrawFetch,
   } = useUserWithdraw(requestingWithdraw);
+
   const [formData, setFormData] = useState<Withdraw>();
-  const { data } = useUserData();
   // data?.bnbReferralsEarning
   // data?.stakedBNB
 
-  const [amountType, setAmountType] = useState<"staked" | "ReferralsEarning">();
+  const [amountType, setAmountType] = useState<AmountType>();
 
   const [availableWithdrawAmount, setAvailableWithdrawAmount] =
     useState<number>(0);
@@ -165,8 +168,7 @@ const WithdrawScreen = () => {
 
   useEffect(() => {
     const amount =
-      amountType === ("ReferralsEarning" as "staked" | "ReferralsEarning") &&
-      coin === "BNB"
+      amountType === ("ReferralsEarning" as AmountType) && coin === "BNB"
         ? data?.bnbReferralsEarning ?? 0
         : withdrawType === "Referral Earning" && coin === "USDT"
         ? data?.usdtReferralsEarning ?? 0
@@ -177,8 +179,7 @@ const WithdrawScreen = () => {
         : 0;
 
     const message =
-      amountType === ("ReferralsEarning" as "staked" | "ReferralsEarning") &&
-      coin === "BNB"
+      amountType === ("ReferralsEarning" as AmountType) && coin === "BNB"
         ? `BNB Referrals Earning`
         : withdrawType === "Referral Earning" && coin === "USDT"
         ? `USDT Referrals Earning`
@@ -368,7 +369,7 @@ const WithdrawScreen = () => {
                       <TableHead>Duration</TableHead>
                       <TableHead>Max APY</TableHead>
                       <TableHead>Received APY</TableHead>
-                      <TableHead>Claimable APY</TableHead>
+                      <TableHead>Claimable APY </TableHead>
                       <TableHead>Staked On</TableHead>
                       <TableHead>Last Requested On</TableHead>
                       <TableHead>Status</TableHead>

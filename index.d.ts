@@ -60,6 +60,7 @@ interface UserData {
   createdAt?: number;
 }
 type EarningType = "Staking APY" | "Referral Earning";
+type AmountType = "staked" | "ReferralsEarning";
 interface Referral {
   level: number;
   data: UserData;

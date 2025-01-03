@@ -1,3 +1,5 @@
+import { APYS } from "@/config/apys";
+import { dayDifference, timeStampToDate } from "@/lib/utils";
 import { db } from "@/services/firebase";
 import { ReferralService } from "@/services/referral";
 import { UserService } from "@/services/user";
@@ -139,7 +141,75 @@ export const useUserWithdraw = (reload: boolean) => {
 
   return { data, loading, error };
 };
+export const useUserAcceptedWithdraws = () => {
+  const [acceptedWithdrawAmountStaking, setAcceptedWithdrawAmountStaking] =
+    useState<number>(0);
 
+  const [acceptedWithdrawAmountReferral, setAcceptedWithdrawAmountReferral] =
+    useState<number>(0);
+
+  // requeste withdraws
+  const [requestedWithdrawAmountStaking, setRequestedWithdrawAmountStaking] =
+    useState<number>(0);
+  const [requestedWithdrawAmountReferral, setRequestedWithdrawAmountReferral] =
+    useState<number>(0);
+
+  const {
+    data: userWithdraws,
+    loading,
+    // error: errorWithdrawFetch,
+  } = useUserWithdraw(true);
+  useEffect(() => {
+    if (userWithdraws) {
+      const tempWithdrawAccpeted: Withdraw[] = [];
+
+      let tempWithdrawStakingAccpetedAmount = 0;
+      let tempWithdrawReferralAccpetedAmount = 0;
+      let tempWithdrawStakingRequestedAmount = 0;
+      let tempWithdrawReferralRequestedAmount = 0;
+
+      Object.keys(userWithdraws)
+        .filter((key) => typeof userWithdraws[key] === "object")
+
+        .forEach((key) => {
+          const stake: Withdraw = userWithdraws[key];
+          console.log("stake", stake);
+
+          if (stake.status === "requested") {
+            if (stake.type === "Staking APY") {
+              tempWithdrawStakingRequestedAmount += stake.amount;
+            } else {
+              tempWithdrawReferralRequestedAmount += stake.amount;
+            }
+          } else {
+            if (stake.type === "Staking APY") {
+              tempWithdrawStakingAccpetedAmount += stake.amount;
+            } else {
+              tempWithdrawReferralAccpetedAmount += stake.amount;
+            }
+            tempWithdrawAccpeted.push(stake);
+          }
+        });
+      setAcceptedWithdrawAmountStaking(tempWithdrawStakingAccpetedAmount);
+      setAcceptedWithdrawAmountReferral(tempWithdrawReferralAccpetedAmount);
+
+      setRequestedWithdrawAmountStaking(tempWithdrawStakingRequestedAmount);
+      setRequestedWithdrawAmountReferral(tempWithdrawReferralRequestedAmount);
+    }
+  }, [userWithdraws]);
+
+  return {
+    accepted: {
+      referral: acceptedWithdrawAmountReferral,
+      staking: acceptedWithdrawAmountStaking,
+    },
+    requested: {
+      referral: requestedWithdrawAmountReferral,
+      staking: requestedWithdrawAmountStaking,
+    },
+    loading,
+  };
+};
 export const useAllWithdrawRequests = (reload: boolean) => {
   const { address } = useAccount();
   const [loading, setLoading] = useState(false);
@@ -157,7 +227,7 @@ export const useAllWithdrawRequests = (reload: boolean) => {
       });
 
       if (tempRequestsData) {
-        const tempWithdrawRequests: Withdraw[] = [];
+        const tempWithdrawAccpeted: Withdraw[] = [];
 
         tempRequestsData.forEach((userWithdraws) => {
           Object.keys(userWithdraws)
@@ -165,9 +235,9 @@ export const useAllWithdrawRequests = (reload: boolean) => {
             .filter((key) => userWithdraws[key].status === "requested")
             .forEach((key) => {
               const withdrawRequest: Withdraw = userWithdraws[key];
-              tempWithdrawRequests.push(withdrawRequest);
+              tempWithdrawAccpeted.push(withdrawRequest);
             });
-          setData(tempWithdrawRequests);
+          setData(tempWithdrawAccpeted);
           setLoading(false);
         });
       } else {
@@ -187,21 +257,37 @@ export const useUserStakes = (reload: boolean) => {
   const [error, setError] = useState<string>();
 
   const [data, setData] = useState<StakeInfo[]>();
+  const [claimableApy, setClaimableApy] = useState<number>(0);
+
+  const { data: userData } = useUserData();
 
   useEffect(() => {
+    console.log("reload", reload);
     async function fetchUserStakes() {
       setLoading(true);
-      const userDoc = doc(collection(db, "users"), address);
-      const existingSnapshot = await getDoc(userDoc);
-
-      if (existingSnapshot.exists()) {
-        const userData = existingSnapshot.data() as UserData;
+      if (userData) {
         if (userData.stakeInfo) {
           // userData.stakeInfo: Record<string, StakeInfo>
           const tempStakes: StakeInfo[] = [];
+          let tempClaimableApy = 0;
           Object.keys(userData.stakeInfo).forEach((key) => {
+            const stake = userData.stakeInfo![key];
+            tempClaimableApy +=
+              (stake.amount *
+                APYS[stake.duration] *
+                (stake.lastRequestedOn
+                  ? dayDifference(
+                      timeStampToDate(stake.lastRequestedOn),
+                      new Date()
+                    )
+                  : dayDifference(
+                      timeStampToDate(stake.stakedOn),
+                      new Date()
+                    ))) /
+              100;
             tempStakes.push(userData.stakeInfo![key]);
           });
+          setClaimableApy(tempClaimableApy);
           setData(tempStakes);
         }
         setLoading(false);
@@ -211,7 +297,7 @@ export const useUserStakes = (reload: boolean) => {
       }
     }
     fetchUserStakes();
-  }, [address, reload]);
+  }, [address, reload, userData]);
 
-  return { data, loading, error };
+  return { userData, data, claimableApy, loading, error };
 };
