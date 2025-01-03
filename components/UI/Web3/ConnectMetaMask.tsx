@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Wallet } from "lucide-react";
 import Button from "../Main/Button";
 import WalletModel from "./WalletModel";
-export default function ConnectMetaMask() {
+function ConnectMetaMask() {
   const account = useAccount();
   const { disconnect } = useDisconnect();
   const [showModal, setShowModal] = useState(false);
@@ -38,3 +38,4 @@ export default function ConnectMetaMask() {
     </HBox>
   );
 }
+export default ConnectMetaMask;
