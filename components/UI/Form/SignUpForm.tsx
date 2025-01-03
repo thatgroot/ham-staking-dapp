@@ -23,7 +23,7 @@ interface SignUpFormProps {
   referralCode?: string;
 }
 
-export default function SignUpForm({ wallet, referralCode }: SignUpFormProps) {
+export function SignUpForm({ wallet, referralCode }: SignUpFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const { formData, handleChange } = useSignupForm(wallet, referralCode);

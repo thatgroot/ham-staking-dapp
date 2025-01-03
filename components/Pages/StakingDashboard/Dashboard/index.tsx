@@ -4,112 +4,90 @@ import refferalEarning from "@/public/assets/totalearning.png";
 import totalFriends from "@/public/assets/friends.png";
 import Card from "@/components/ui/Dashboard/Card";
 import Image from "next/image";
-import Calculator from "./components/Calculator";
-import { useUserData, useUserReferrals } from "@/hooks/user";
+import {
+  useUserAcceptedWithdraws,
+  useUserReferrals,
+  useUserStakes,
+} from "@/hooks/user";
 import { HBox, VBox } from "@/components/ui/Directional/flex";
 import { notify } from "@/utils/notifications";
-import { ReferralsPage } from "../../Referrals";
-import { MyStakes } from "../Stake/MyStakes";
+import Calculator from "@/components/Pages/StakingDashboard/Dashboard/components/Calculator";
+import { ReferralsPage } from "@/components/Pages/Referrals";
+import { MyStakes } from "@/components/Pages/StakingDashboard/Stake/MyStakes";
+import { useUserAmountStatistic } from "@/hooks/statistic";
+import { LoaderCircle } from "lucide-react";
 
 const Dashboard = () => {
-  const { data: user } = useUserData();
   const { count } = useUserReferrals();
+
+  const { statistic, loading } = useUserAmountStatistic();
+  const {
+    accepted,
+    requested,
+    loading: loadingAcceptedWithdraws,
+  } = useUserAcceptedWithdraws();
+
+  const {
+    userData: user,
+    claimableApy,
+    loading: loadingStakes,
+  } = useUserStakes(loadingAcceptedWithdraws);
 
   return (
     <div className="space-y-6">
       {/* Cards Section */}
-      {user && (
+
+      {
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 md:gap-6">
-          <Card
-            title={"BNB Stakes"}
-            icon={
-              <Image
-                alt="BNB Stakes"
-                src={"/dashboard/stake.png"}
-                width={100}
-                height={100}
-                className="w-full"
+          {loading || loadingStakes || loadingAcceptedWithdraws ? (
+            <LoaderCircle className="animate-spin h-5 w-5 mx-auto" />
+          ) : (
+            <>
+              <Card
+                title={"Claimable APY"}
+                value={claimableApy}
+                color
+                icon={undefined}
               />
-            }
-            value={user.stakedBNB ?? 0}
-            color
-          />
+              {statistic?.map((item) => (
+                <Card
+                  key={item.key}
+                  title={item.key}
+                  value={item.value}
+                  color
+                  icon={undefined}
+                />
+              ))}
 
-          <Card
-            title={"USDT Stakes"}
-            icon={
-              <Image
-                alt="USDT Stakes"
-                src={"/dashboard/stake.png"}
-                width={100}
-                height={100}
-                className="w-full"
+              <Card
+                title={"Accepted Staking Withdraws"}
+                value={accepted.staking}
+                color
+                icon={undefined}
               />
-            }
-            value={user.stakedUSDT ?? 0}
-            color
-          />
+              <Card
+                title={"Accepted Referral Withdraws"}
+                value={accepted.referral}
+                color
+                icon={undefined}
+              />
 
-          <Card
-            title={"BNB Referrals Earning"}
-            icon={
-              <Image
-                alt="BNB Referrals Earning"
-                src={"/dashboard/balance.png"}
-                width={100}
-                height={100}
-                className="w-full"
+              <Card
+                title={"Requested Staking Withdraws"}
+                value={requested.staking}
+                color
+                icon={undefined}
               />
-            }
-            value={user.bnbReferralsEarning?.toFixed(4) ?? 0}
-            color
-          />
-          <Card
-            title={"USDT Referrals Earning"}
-            icon={
-              <Image
-                alt="USDT Referrals Earning"
-                src={"/dashboard/balance.png"}
-                width={100}
-                height={100}
-                className="w-full"
+              <Card
+                title={"Requested Referral Withdraws"}
+                value={requested.referral}
+                color
+                icon={undefined}
               />
-            }
-            value={user.usdtReferralsEarning?.toFixed(4) ?? 0}
-            color
-          />
-
-          <Card
-            title={"Referral USDT Stakes"}
-            icon={
-              <Image
-                alt="Referral USDT Stakes"
-                src={"/dashboard/balance.png"}
-                width={100}
-                height={100}
-                className="w-full"
-              />
-            }
-            value={user.groupUSDTStakes ?? 0}
-            color
-          />
-
-          <Card
-            title={"Referral BNB Stakes"}
-            icon={
-              <Image
-                alt="Referral BNB Stakes"
-                src={"/dashboard/balance.png"}
-                width={100}
-                height={100}
-                className="w-full"
-              />
-            }
-            value={user.groupBNBStakes ?? 0}
-            color
-          />
+            </>
+          )}
         </div>
-      )}
+      }
 
       {/* Referral Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
