@@ -58,7 +58,6 @@ export default function WithdrawStatistic({
             return (
               <VBox
                 key={index}
-                // @ts-expect-error['']
                 type="button"
                 disabled={apyClaimableDays === 0}
                 as="button"
