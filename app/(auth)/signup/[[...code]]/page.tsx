@@ -2,11 +2,11 @@
 
 import { useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { SignUpForm } from "@/components/ui/Form/SignUpForm";
 import { ReferralService } from "@/services/referral";
 import { VBox } from "@/components/ui/Directional/flex";
 import { ConnectMetaMask } from "@/components/ui/Web3/ConnectMetaMask";
 import { useAccount } from "wagmi";
+import { SignUpForm } from "@/components/ui/Form/SignUpForm";
 
 export default function RegistrationContent() {
   const { address } = useAccount();
