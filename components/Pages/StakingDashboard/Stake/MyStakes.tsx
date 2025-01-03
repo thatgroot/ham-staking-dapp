@@ -26,7 +26,6 @@ export function MyStakes() {
             <TableRow>
               <TableHead>Coin</TableHead>
               <TableHead>Wallet</TableHead>
-              <TableHead>Name</TableHead>
               <TableHead>Amount</TableHead>
               <TableHead>Duration</TableHead>
               <TableHead>Staked On</TableHead>
@@ -45,7 +44,6 @@ export function MyStakes() {
                   <TableRow key={stake.stakedOn}>
                     <TableCell className="font-medium">{stake.coin}</TableCell>
                     <TableCell>{stake.wallet}</TableCell>
-                    <TableCell>{stake.name}</TableCell>
                     <TableCell>{stake.amount}</TableCell>
                     <TableCell>{stake.duration} days</TableCell>
                     <TableCell>

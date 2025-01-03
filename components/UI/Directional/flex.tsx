@@ -28,15 +28,3 @@ export const Flex: React.FC<FlexProps> = ({
     </Component>
   );
 };
-
-export function HBox({ children, ...rest }: Omit<FlexProps, "direction">) {
-  return <Flex {...rest}>{children}</Flex>;
-}
-
-export function VBox({ children, ...rest }: Omit<FlexProps, "direction">) {
-  return (
-    <Flex flexDirection="column" {...rest}>
-      {children}
-    </Flex>
-  );
-}

@@ -16,7 +16,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CustomCard from "@/components/ui/Dashboard/Card";
 import Button from "@/components/ui/Main/Button";
 import { useSendBnb, useSendUSTD } from "@/hooks/transactions";
-import { HBox, VBox } from "@/components/ui/Directional/flex";
+import VBox from "@/components/ui/Directional/VBox";
+
+import HBox from "@/components/ui/Directional/HBox";
 import { useStatistic } from "@/hooks/statistic";
 import { useEffect, useState } from "react";
 import { UserService } from "@/services/user";

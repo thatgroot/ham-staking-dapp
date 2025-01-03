@@ -9,7 +9,7 @@ import ThemeToggler from "@/components/ui/Dashboard/ThemeChanger";
 import { menuItems } from "./menu-items";
 import { Menu, X } from "lucide-react";
 import PoweredByBnb from "@/components/ui/Main/PoweredByBnb";
-import { ConnectMetaMask } from "@/components/ui/Web3/ConnectMetaMask";
+import ConnectMetaMask from "@/components/ui/Web3/ConnectMetaMask";
 
 const menuVariants = {
   closed: {

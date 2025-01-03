@@ -23,7 +23,7 @@ interface SignUpFormProps {
   referralCode?: string;
 }
 
-export function SignUpForm({ wallet, referralCode }: SignUpFormProps) {
+export default function SignUpForm({ wallet, referralCode }: SignUpFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const { formData, handleChange } = useSignupForm(wallet, referralCode);
@@ -34,6 +34,7 @@ export function SignUpForm({ wallet, referralCode }: SignUpFormProps) {
     setLoading(true);
     setError(null);
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { by, ...formDataWithoutCode } = formData;
 
     if (!formDataWithoutCode.name || !formDataWithoutCode.wallet) {

@@ -5,7 +5,7 @@ import Button from "@/components/ui/Main/Button";
 import { MenuIcon, Wallet, X } from "lucide-react";
 import Link from "next/link";
 import Logo from "@/components/ui/Main/Logo";
-import { ConnectMetaMask } from "@/components/ui/Web3/ConnectMetaMask";
+import ConnectMetaMask from "@/components/ui/Web3/ConnectMetaMask";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);

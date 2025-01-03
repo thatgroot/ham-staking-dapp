@@ -9,7 +9,9 @@ import {
   useUserReferrals,
   useUserStakes,
 } from "@/hooks/user";
-import { HBox, VBox } from "@/components/ui/Directional/flex";
+import VBox from "@/components/ui/Directional/VBox";
+
+import HBox from "@/components/ui/Directional/HBox";
 import { notify } from "@/utils/notifications";
 import Calculator from "@/components/Pages/StakingDashboard/Dashboard/components/Calculator";
 import { ReferralsPage } from "@/components/Pages/Referrals";

@@ -1,6 +1,6 @@
 "use client";
 
-import { VBox } from "@/components/ui/Directional/flex";
+import VBox from "@/components/ui/Directional/VBox";
 import { dayDifference, timeStampToDate } from "@/lib/utils";
 import { APYS } from "@/config/apys";
 
@@ -58,6 +58,7 @@ export default function WithdrawStatistic({
             return (
               <VBox
                 key={index}
+                // @ts-expect-error['']
                 type="button"
                 disabled={apyClaimableDays === 0}
                 as="button"

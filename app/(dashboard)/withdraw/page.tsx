@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/select";
 import { UserService } from "@/services/user";
 import { useUserStakes, useUserWithdraw } from "@/hooks/user";
-import { HBox } from "@/components/ui/Directional/flex";
+import HBox from "@/components/ui/Directional/HBox";
 import { notify } from "@/utils/notifications";
 import {
   Table,
