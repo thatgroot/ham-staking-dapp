@@ -136,8 +136,8 @@ export const UserService = {
       }
       await StatisticService.updateStakes({
         bnbStakes: coin === "BNB" ? value : 0,
-        usdtStakes: coin === "USDT" ? value : 0,
-        usdtreferralEarning: coin === "USDT" ? accumulatedCommissions : 0,
+        // usdtStakes: coin === "USDT" ? value : 0,
+        // usdtreferralEarning: coin === "USDT" ? accumulatedCommissions : 0,
         bnbreferralEarning: coin === "BNB" ? accumulatedCommissions : 0,
       });
 

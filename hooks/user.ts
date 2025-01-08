@@ -1,4 +1,5 @@
 import { APYS } from "@/config/apys";
+import { ADMIN_WALLET } from "@/config/wagmi";
 import { dayDifference, timeStampToDate } from "@/lib/utils";
 import { db } from "@/services/firebase";
 import { ReferralService } from "@/services/referral";
@@ -8,6 +9,18 @@ import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
 const WITHDRAW_COLLECTION = collection(db, "withdraw_requests");
 
+export const useIsAdmin = () => {
+  const { address } = useAccount();
+  // "0xdC673920D2F91408Fb02aBda2Ca129810aB09e35"
+
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    setIsAdmin(address === ADMIN_WALLET);
+  }, [address]);
+
+  return { isAdmin };
+};
 export const useAllUsers = () => {
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);

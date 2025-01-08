@@ -15,7 +15,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import CustomCard from "@/components/ui/Dashboard/Card";
 import Button from "@/components/ui/Main/Button";
-import { useSendBnb, useSendUSTD } from "@/hooks/transactions";
+import { useSendBnb } from "@/hooks/transactions";
 import VBox from "@/components/ui/Directional/VBox";
 
 import HBox from "@/components/ui/Directional/HBox";
@@ -26,7 +26,7 @@ import { UserService } from "@/services/user";
 const titles = {
   userCount: "Total Users",
   bnbStakes: "Total BNB Stakes",
-  usdtStakes: "Total USDT Stakes",
+  // usdtStakes: "Total USDT Stakes",
   usdtreferralEarning: "Total USDT Referral Earnings",
   bnbreferralEarning: "Total BNB Referral Earnings",
 };
@@ -39,14 +39,13 @@ const WithdrawScreen = () => {
     isConfirmed: isBNBSendConfirmed,
     isPending: isBNBSendPending,
   } = useSendBnb();
-  const {
-    isSuccess: isUSDTTransferConfirmed,
-    sendUSTD,
-    isLoading: isUSDTSendPending,
-  } = useSendUSTD();
-  const { data: withdrawRequests, loading } = useAllWithdrawRequests(
-    isUSDTTransferConfirmed || isBNBSendConfirmed
-  );
+  // const {
+  //   isSuccess: isUSDTTransferConfirmed,
+  //   sendUSTD,
+  //   isLoading: isUSDTSendPending,
+  // } = useSendUSTD();
+  const { data: withdrawRequests, loading } =
+    useAllWithdrawRequests(isBNBSendConfirmed);
 
   const [requestedByWallet, setRequestedByWallet] = useState<string>();
   const [withdrawRequestedOn, setWithdrawRequestedOn] = useState<number>();
@@ -54,30 +53,30 @@ const WithdrawScreen = () => {
   const { statistic } = useStatistic();
 
   function distributeRewards(withdraw: Withdraw) {
-    const { toWallet, coin, type, amount, requestedBy, requestedOn } = withdraw;
+    const { toWallet, type, amount, requestedBy, requestedOn } = withdraw;
     setStakeKey(withdraw.stakeInfo.stakedOn);
     setRequestedByWallet(requestedBy);
     setWithdrawRequestedOn(requestedOn);
 
     if (type === "Referral Earning") {
-      if (coin === "BNB") {
-        sendBnb(toWallet, amount);
-      } else {
-        sendUSTD(toWallet, amount);
-      }
+      // if (coin === "BNB") {
+      sendBnb(toWallet, amount);
+      // } else {
+      //   sendUSTD(toWallet, amount);
+      // }
     } else if (type === "Staking APY") {
-      // const apy = amount * APYS[withdraw];
-      if (coin === "BNB") {
-        sendBnb(toWallet, amount);
-      } else {
-        sendUSTD(toWallet, amount);
-      }
+      // // const apy = amount * APYS[withdraw];
+      // if (coin === "BNB") {
+      sendBnb(toWallet, amount);
+      // } else {
+      //   sendUSTD(toWallet, amount);
+      // }
     }
   }
 
   useEffect(() => {
-    console.log(isBNBSendConfirmed, isUSDTTransferConfirmed);
-    if (isBNBSendConfirmed || isUSDTTransferConfirmed) {
+    console.log(isBNBSendConfirmed);
+    if (isBNBSendConfirmed) {
       if (requestedByWallet && stakeKey && withdrawRequestedOn) {
         UserService.updateSpecificStake({
           wallet: requestedByWallet,
@@ -87,7 +86,7 @@ const WithdrawScreen = () => {
         });
       }
     }
-  }, [isUSDTTransferConfirmed, isBNBSendConfirmed]);
+  }, [isBNBSendConfirmed]);
 
   return (
     <VBox gap={12}>
@@ -192,7 +191,7 @@ const WithdrawScreen = () => {
                             icon={undefined}
                           >
                             <span>
-                              {isBNBSendPending || isUSDTSendPending ? (
+                              {isBNBSendPending ? (
                                 <>
                                   <LoaderCircle className="animate-spin h-5 w-5 mr-2" />
                                 </>

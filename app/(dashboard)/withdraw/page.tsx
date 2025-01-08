@@ -30,7 +30,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { dayDifference, timeStampToDate } from "@/lib/utils";
 import { APYS } from "@/config/apys";
 
-const coins = ["BNB", "USDT"];
+const coins = ["BNB"];
 const earnings = ["Staking APY", "Referral Earning"];
 
 // Main Withdraw Component
@@ -66,7 +66,7 @@ const WithdrawScreen = () => {
     "Referral Earning" | "Staking APY"
   >("Staking APY");
 
-  const [coin, setCoin] = useState<string>("USDT");
+  const [coin, setCoin] = useState<string>("BNB");
 
   const updateFormData = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({

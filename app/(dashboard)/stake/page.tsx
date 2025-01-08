@@ -9,7 +9,7 @@ import { UserService } from "@/services/user";
 
 import { formatEther } from "viem";
 import { notify } from "@/utils/notifications";
-import { useSendBnb, useSendUSTD, useUSDTBalance } from "@/hooks/transactions";
+import { useSendBnb, useUSDTBalance } from "@/hooks/transactions";
 import { APYS } from "@/config/apys";
 import { calculateTotalAPYForAStake } from "@/lib/utils";
 
@@ -18,11 +18,11 @@ export default function Staking() {
 
   const { sendBnb, isConfirmed, isConfirming, isPending } = useSendBnb();
 
-  const {
-    isLoading: isConfirmingUSDTTransfer,
-    isSuccess: isUSDTTransferConfirmed,
-    sendUSTD,
-  } = useSendUSTD();
+  // const {
+  //   isLoading: isConfirmingUSDTTransfer,
+  //   isSuccess: isUSDTTransferConfirmed,
+  //   sendUSTD,
+  // } = useSendUSTD();
 
   const [BNBBalance, setBNBBalance] = useState(0);
 
@@ -40,14 +40,14 @@ export default function Staking() {
   }>({
     amount: 50,
     duration: 200,
-    coin: "USDT",
+    coin: "BNB",
   });
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   const durations = [200, 365, 500];
-  const coins = ["USDT", "BNB"];
+  const coins = ["BNB"];
 
   const handleAmountChange = (e: ChangeEvent<HTMLInputElement>) => {
     const MAX_LIMIT = stakeData.coin === "BNB" ? BNBBalance : usdtBalance;
@@ -94,10 +94,10 @@ export default function Staking() {
       sendBnb(MAIN_WALLET, stakeData.amount);
     }
 
-    function stakeUSDT() {
-      if (!address || isPending) return;
-      sendUSTD(MAIN_WALLET, stakeData.amount);
-    }
+    // function stakeUSDT() {
+    //   if (!address || isPending) return;
+    //   sendUSTD(MAIN_WALLET, stakeData.amount);
+    // }
     if (
       stakeData.amount >=
         (stakeData.coin === "BNB" ? BNBBalance : usdtBalance) ||
@@ -109,23 +109,28 @@ export default function Staking() {
       });
       return;
     }
-    // if (stakeData.amount < 50 || stakeData.amount > 1000) {
-    //   notify({
-    //     content: "Staking amount limit is 50 USDT - 1000 USDT",
-    //     type: "error",
-    //   });
-    //   return;
-    // }
-    if (stakeData.coin === "USDT") {
-      stakeUSDT();
-    } else {
-      stakeBNB();
+    if (stakeData.amount < 50) {
+      notify({
+        content: "Staking amount limit is 50 USDT - 1000 USDT",
+        type: "error",
+      });
+      return;
     }
+    // if (stakeData.coin === "USDT") {
+    //   stakeUSDT();
+    // } else {
+    stakeBNB();
+    // }
   }
 
   useEffect(() => {
     async function updateStakeInfo() {
       if (isConfirmed && address) {
+        // Timestamp in seconds
+        const timestamp = 1727950403;
+
+        // Convert to milliseconds (JavaScript uses milliseconds)
+        const date = new Date(timestamp * 1000);
         await UserService.addStakeInfo({
           wallet: address,
           stakeData: {
@@ -133,7 +138,7 @@ export default function Staking() {
             wallet: address,
             amount: +stakeData.amount.toFixed(4),
             duration: stakeData.duration,
-            stakedOn: Date.now(),
+            stakedOn: date.getTime(),
             maxApy: +calculateTotalAPYForAStake(
               stakeData.duration,
               stakeData.amount
@@ -150,32 +155,32 @@ export default function Staking() {
     updateStakeInfo();
   }, [isConfirmed]);
 
-  useEffect(() => {
-    async function updateStakeInfo() {
-      if (isUSDTTransferConfirmed && address) {
-        await UserService.addStakeInfo({
-          wallet: address,
-          stakeData: {
-            coin: "USDT",
-            wallet: address,
-            amount: +stakeData.amount.toFixed(4),
-            duration: stakeData.duration,
-            stakedOn: Date.now(),
-            maxApy: +calculateTotalAPYForAStake(
-              stakeData.duration,
-              stakeData.amount
-            ).toFixed(4),
-          },
-          value: stakeData.amount,
-        });
-        notify({
-          content: "USDT staked successfully!",
-          type: "success",
-        });
-      }
-    }
-    updateStakeInfo();
-  }, [isUSDTTransferConfirmed]);
+  // useEffect(() => {
+  //   async function updateStakeInfo() {
+  //     if (isUSDTTransferConfirmed && address) {
+  //       await UserService.addStakeInfo({
+  //         wallet: address,
+  //         stakeData: {
+  //           coin: "USDT",
+  //           wallet: address,
+  //           amount: +stakeData.amount.toFixed(4),
+  //           duration: stakeData.duration,
+  //           stakedOn: Date.now(),
+  //           maxApy: +calculateTotalAPYForAStake(
+  //             stakeData.duration,
+  //             stakeData.amount
+  //           ).toFixed(4),
+  //         },
+  //         value: stakeData.amount,
+  //       });
+  //       notify({
+  //         content: "USDT staked successfully!",
+  //         type: "success",
+  //       });
+  //     }
+  //   }
+  //   updateStakeInfo();
+  // }, [isUSDTTransferConfirmed]);
 
   useEffect(() => {
     if (fetchedBNBBalance && bnbData) {
@@ -192,7 +197,6 @@ export default function Staking() {
         </h2>
         <div className="flex items-center justify-between md:px-4 px-2 py-6 rounded-xl border border-[#00C3FF] dark:border-[#2DE995] bg-white dark:bg-black/50 shadow-inner">
           <div className="flex items-center md:gap-4 gap-2">
-            {/* Coin Dropdown */}
             <div className="relative">
               <button
                 className="flex items-center gap-2 md:px-4 px-1 py-3 bg-[#00C3FF] dark:bg-green-400 rounded-xl shadow-md transition-colors duration-200"
@@ -346,7 +350,7 @@ export default function Staking() {
             }}
             className="px-6 w-full py-2 bg-[#11C7FF] text-black rounded-lg text-sm md:text-lg min-w-[150px] uppercase  font-sem transition-all duration-300 dark:bg-[#2DE995] shadow-lg hover:bg-[#0FB8EC] focus:outline-none focus:ring-2 focus:ring-[#11C7FF] focus:ring-opacity-50"
           >
-            {isConfirmingUSDTTransfer || isConfirming ? (
+            {isConfirming ? (
               <LoaderCircle className="h-6 w-6 animate-spin" />
             ) : (
               "Stake"

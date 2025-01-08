@@ -10,30 +10,23 @@ import Image from "next/image";
 import ThemeToggler from "@/components/ui/Dashboard/ThemeChanger";
 import { X } from "lucide-react";
 import PoweredByBnb from "@/components/ui/Main/PoweredByBnb";
-import { useAccount } from "wagmi";
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useIsAdmin } from "@/hooks/user";
 
 const Sidenav = ({ onClose, open }) => {
   const currentPath = usePathname();
-  const { address } = useAccount();
-  const [isAdmin, setIsAdmin] = useState(false);
 
-  useEffect(() => {
-    if (!address) return;
-    // if (address === "0x8c462b0fb450b64603Fc6BFDe6455D4f8e258c3A") {
-    if (address === "0xF69c12BCAb3cc3Bef5a5BF7eD990B26dA2871D55") {
-      setIsAdmin(true);
-    }
-  }, [address]);
+  const { isAdmin } = useIsAdmin();
+
   const menuItems = [
     {
       icon: Dashboard,
       label: "Dashboard",
       href: "/dashboard",
+      forAdmin: true,
     },
     { icon: Staking, label: "Staking", href: "/stake" },
-    { icon: Swap, label: "Swap", href: "/swap" },
+    { icon: Swap, label: "Swap", href: "/swap", disabled: true },
     { icon: Withdraw, label: "Withdraw", href: "/withdraw" },
   ];
 
@@ -52,7 +45,7 @@ const Sidenav = ({ onClose, open }) => {
         </div>
         <nav className="mt-4">
           {menuItems.map((item) => (
-            <Link key={item.href} href={item.href}>
+            <Link key={item.href} href={item.disabled ? "" : item.href}>
               <div className="flex items-center">
                 <button
                   className={`${
